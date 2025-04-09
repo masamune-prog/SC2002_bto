@@ -2,15 +2,16 @@ package model.project;
 
 import model.user.Manager;
 import model.user.Officer;
-
+import model.Model;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-public class Project {
+import model.Model;
+public class Project implements Model {
     //ProjectStatus status;
+    private String projectID;
     private String targetedUserGroup;
     private boolean visibility;
     private String projectName; // Project ID
@@ -29,16 +30,15 @@ public class Project {
      * @param visibility Whether the project is visible to applicants
      * @param projectName Project name/identifier
      * @param neighborhood The neighborhood location (e.g., Yishun, Boon Lay)
-     * @param twoRoomUnits Number of 2-Room units available
-     * @param threeRoomUnits Number of 3-Room units available
      * @param applicationOpeningDate Date when applications open
      * @param applicationClosingDate Date when applications close
      * @param managerInCharge HDB Manager responsible for this project
      */
-    public Project(String targetedUserGroup, boolean visibility, String projectName,
+    public Project(String projectID,String targetedUserGroup, boolean visibility, String projectName,
                    String neighborhood, int flatsAvailable,
                    LocalDate applicationOpeningDate, LocalDate applicationClosingDate,
                    Manager managerInCharge) {
+        this.projectID = projectID;
         this.targetedUserGroup = targetedUserGroup;
         this.visibility = visibility;
         this.projectName = projectName;
@@ -52,7 +52,9 @@ public class Project {
         this.assignedOfficers = new ArrayList<>();
         this.availableOfficerSlots = 10; // Maximum 10 slots
     }
-
+    public Project(Map<String, String> map) {
+        fromMap(map);
+    }
     public String getTargetedUserGroup() {
         return targetedUserGroup;
     }
@@ -140,5 +142,10 @@ public class Project {
 
     public int getAvailableOfficerSlots() {
         return availableOfficerSlots;
+    }
+
+    @Override
+    public String getID() {
+        return projectID;
     }
 }

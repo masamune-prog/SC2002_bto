@@ -1,11 +1,12 @@
 package model.user;
 
+import java.util.Map;
+
 public class Manager implements User {
     private String managerID;
     private String nric;
     private String hashedPassword;
     private String name;
-    private String project;
     private String projectInCharge;
     /**
      * Constructs a new Manager object with the specified NRIC and default password.
@@ -20,10 +21,11 @@ public class Manager implements User {
         this.nric = nric;
         this.hashedPassword = passwordHash;
         this.name = name;
-        this.project = project;
         this.projectInCharge = projectInCharge;
     }
-
+    public Manager(Map<String, String> informationMap) {
+        fromMap(informationMap);
+    }
     @Override
     public String getID() {
         return this.managerID;
@@ -64,5 +66,19 @@ public class Manager implements User {
         this.name = name;
     }
 
-
+    public String getProjectInCharge() {
+        return projectInCharge;
+    }
+    public void setProjectInCharge(String projectInCharge) {
+        this.projectInCharge = projectInCharge;
+    }
+    @Override
+    public void fromMap(Map<String, String> map) {
+        this.managerID = map.get("managerID");
+        this.nric = map.get("nric");
+        this.hashedPassword = map.get("hashedPassword");
+        this.name = map.get("name");
+        // Default project value if not specified
+        this.projectInCharge = map.get("projectInCharge") != null ? map.get("projectInCharge") : "No Project";
+    }
     }

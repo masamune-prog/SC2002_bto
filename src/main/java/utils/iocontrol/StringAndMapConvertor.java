@@ -2,8 +2,8 @@ package utils.iocontrol;
 
 import java.util.*;
 
-import static main.utils.iocontrol.ObjectOutputControlCharacters.DELIMITER_STRING;
-import static main.utils.iocontrol.ObjectOutputControlCharacters.SEPARATOR_STRING;
+import static utils.iocontrol.ObjectOutputControlCharacters.DELIMITER_STRING;
+import static utils.iocontrol.ObjectOutputControlCharacters.SEPARATOR_STRING;
 
 /**
  * The StringAndMapConvertor class provides methods to convert a String representation of a map to a Map object,

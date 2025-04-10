@@ -1,21 +1,26 @@
 package model.user;
 import model.Model;
-public interface User {
+public interface User extends Model {
+    String getID();
+    void setID(String id);
+
     String getNric();
     void setNric(String nric);
+    /**
+     * Gets the hashed password of the user
+     *
+     * @return the hashed password of the user
+     */
+    String getHashedPassword();
 
-    String getPasswordHash();
-    void setPasswordHash(String passwordHash);
+    /**
+     * Sets the hashed password of the user
+     *
+     * @param hashedPassword the hashed password of the user
+     */
+    void setHashedPassword(String hashedPassword);
 
     String getName();
     void setName(String name);
 
-    int getAge();
-    void setAge(int age);
-
-    String getMaritalStatus();
-    void setMaritalStatus(String maritalStatus);
-
-    String getProject();
-    void setProject(String project);
 }

@@ -1,35 +1,39 @@
 package model.user;
-import utils.parameters.EmptyID;
-import utils.parameters.NotNull;
 import java.util.List;
-
+import model.project.Project;
 public class Officer implements User {
+    private String officerID;
     private String nric;
-    private String passwordHash;
+    private String hashedPassword;
     private String name;
-    private int age;
-    private String maritalStatus;
     private String project;
     private List<String> projectsInCharge;
+
     /**
      * Constructs a new Officer object with the specified NRIC and default password.
      *
-     * @param nric the NRIC of the officer.
-     * @param name the name of the officer.
-     * @param age the age of the officer.
-     * @param maritalStatus the marital status of the officer.
-     * @param project the project assigned to the officer.
+     * @param nric          the NRIC of the officer.
+     * @param name          the name of the officer.
      */
-    public Officer(String nric, String passwordHash, String name, int age, String maritalStatus,
-                   String project, List<String> projectsInCharge) {
+    public Officer(String officerID, String nric, String hashedPassword, String name,String project,
+                   List<String> projectsInCharge) {
         this.nric = nric;
-        this.passwordHash = passwordHash;
+        this.hashedPassword = hashedPassword;
         this.name = name;
-        this.age = age;
-        this.maritalStatus = maritalStatus;
         this.project = project;
         this.projectsInCharge = projectsInCharge;
     }
+
+    @Override
+    public String getID() {
+        return this.officerID;
+    }
+
+    @Override
+    public void setID(String id) {
+
+    }
+
     @Override
     public String getNric() {
         return nric;
@@ -41,14 +45,15 @@ public class Officer implements User {
     }
 
     @Override
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getHashedPassword() {
+        return this.hashedPassword;
     }
 
     @Override
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
     }
+
 
     @Override
     public String getName() {
@@ -60,32 +65,13 @@ public class Officer implements User {
         this.name = name;
     }
 
-    @Override
-    public int getAge() {
-        return age;
-    }
 
-    @Override
-    public void setAge(int age) {
-        this.age = age;
-    }
 
-    @Override
-    public String getMaritalStatus() {
-        return maritalStatus;
-    }
-
-    @Override
-    public void setMaritalStatus(String maritalStatus) {
-        this.maritalStatus = maritalStatus;
-    }
-
-    @Override
     public String getProject() {
         return project;
     }
 
-    @Override
+
     public void setProject(String project) {
         this.project = project;
     }

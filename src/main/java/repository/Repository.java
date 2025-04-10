@@ -43,7 +43,7 @@ public abstract class Repository<ModelObject extends Model> extends Savable<Mode
      * @return the list of mappable objects
      */
     @Override
-    protected List<ModelObject> getAll() {
+    public List<ModelObject> getAll() {
         return listOfModelObjects;
     }
 

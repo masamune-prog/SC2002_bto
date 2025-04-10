@@ -1,6 +1,6 @@
 package utils.iocontrol;
 
-import main.utils.parameters.EmptyID;
+import utils.parameters.EmptyID;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;

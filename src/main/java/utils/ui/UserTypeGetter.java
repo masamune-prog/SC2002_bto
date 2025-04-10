@@ -1,7 +1,7 @@
 package utils.ui;
 
-import main.model.user.User;
-import main.model.user.UserType;
+import model.user.User;
+import model.user.UserType;
 
 /**
  * The {@code UserTypeGetter} class provides utility methods for obtaining different forms of user types.

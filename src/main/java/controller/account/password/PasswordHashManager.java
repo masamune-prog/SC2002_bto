@@ -1,6 +1,6 @@
 package controller.account.password;
 
-import main.utils.parameters.NotNull;
+import utils.parameters.NotNull;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

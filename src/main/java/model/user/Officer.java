@@ -1,12 +1,13 @@
 package model.user;
 import java.util.List;
+import java.util.Map;
+
 import model.project.Project;
 public class Officer implements User {
     private String officerID;
     private String nric;
     private String hashedPassword;
     private String name;
-    private String project;
     private List<String> projectsInCharge;
 
     /**
@@ -20,10 +21,11 @@ public class Officer implements User {
         this.nric = nric;
         this.hashedPassword = hashedPassword;
         this.name = name;
-        this.project = project;
         this.projectsInCharge = projectsInCharge;
     }
-
+    public Officer(Map<String, String> informationMap) {
+        fromMap(informationMap);
+    }
     @Override
     public String getID() {
         return this.officerID;
@@ -65,15 +67,14 @@ public class Officer implements User {
         this.name = name;
     }
 
-
-
-    public String getProject() {
-        return project;
-    }
-
-
-    public void setProject(String project) {
-        this.project = project;
+    @Override
+    public void fromMap(Map<String, String> map) {
+        this.officerID = map.get("officerID");
+        this.nric = map.get("NRIC");
+        this.hashedPassword = map.get("hashedPassword");
+        this.name = map.get("Name");
+        // Initialize projectsInCharge if needed (might be null at first)
+        // We'll need to implement project assignment separately
     }
 
     public List<String> getProjectsInCharge() {

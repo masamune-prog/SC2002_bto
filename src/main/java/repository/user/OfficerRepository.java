@@ -1,6 +1,6 @@
 package repository.user;
 
-import model.user.Manager;
+import model.user.Officer;
 import repository.Repository;
 import utils.config.Location;
 import utils.iocontrol.CSVReader;
@@ -10,31 +10,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ManagerRepository extends Repository<Manager> {
+public class OfficerRepository extends Repository<Officer> {
 
-    private static final String FILE_PATH = "\\ManagerList.csv";
+    private static final String FILE_PATH = "\\OfficerList.csv";
+    private static OfficerRepository instance;
 
-    ManagerRepository() {
+    protected OfficerRepository() {
         super();
-        load();
     }
 
-    public static ManagerRepository getInstance() {
-        return new ManagerRepository();
+    public static OfficerRepository getInstance() {
+        if (instance == null) {
+            instance = new OfficerRepository();
+            instance.load();
+        }
+        return instance;
     }
 
     @Override
     public String getFilePath() {
         return Location.RESOURCE_LOCATION + FILE_PATH;
     }
-    public Manager getByName(String name) {
-        for (Manager manager : getAll()) {
-            if (manager.getName().equals(name)) {
-                return manager;
-            }
-        }
-        return null;
-    }
+
     @Override
     public void load() {
         this.getAll().clear();
@@ -43,25 +40,35 @@ public class ManagerRepository extends Repository<Manager> {
         setAll(mappedData);
     }
 
+    public Officer getOfficerByName(String name) {
+        for (Officer officer : getAll()) {
+            if (officer.getName() != null && officer.getName().equals(name)) {
+                return officer;
+            }
+        }
+        return null;
+    }
+
     private List<Map<String, String>> convertToMapList(List<List<String>> csvData) {
         List<Map<String, String>> result = new ArrayList<>();
 
         // Define column headers based on CSV structure
+        // Keep these capitalized to match exactly what's in the CSV
         String[] headers = {
-                "name", "nric", "age", "maritalStatus", "password"
+                "Name", "NRIC", "Age", "Marital Status", "Password"
         };
 
         // Convert each row to a map and assign ID based on order
         int id = 1;
         for (List<String> row : csvData) {
             Map<String, String> rowMap = new HashMap<>();
-            rowMap.put("managerID", String.valueOf(id++)); // Set ID based on order
+            rowMap.put("officerID", String.valueOf(id++)); // Set ID based on order
 
             for (int i = 0; i < headers.length && i < row.size(); i++) {
                 rowMap.put(headers[i], row.get(i));
 
                 // If we're at the password column, hash it
-                if (headers[i].equals("password")) {
+                if (headers[i].equals("Password")) {
                     String password = row.get(i);
                     if (password != null && !password.isEmpty()) {
                         String hashedPassword = PasswordHashManager.hashPassword(password);
@@ -79,9 +86,13 @@ public class ManagerRepository extends Repository<Manager> {
     public void setAll(List<Map<String, String>> listOfMappableObjects) {
         for (Map<String, String> map : listOfMappableObjects) {
             try {
-                getAll().add(new Manager(map));
+                Officer officer = new Officer(map);
+                // Debug output to see what's happening
+                System.out.println("Created officer: ID=" + officer.getID() + ", Name=" + officer.getName() + ", NRIC=" + officer.getNric());
+                getAll().add(officer);
             } catch (Exception e) {
-                System.err.println("Error parsing manager data: " + e.getMessage());
+                System.err.println("Error parsing officer data: " + e.getMessage());
+                e.printStackTrace(); // Print stack trace for better debugging
             }
         }
     }

@@ -1,0 +1,158 @@
+package controller.project;
+
+import model.project.Project;
+import model.user.Manager;
+import model.user.Officer;
+import repository.project.ProjectRepository;
+import repository.user.ManagerRepository;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Manages project creation and modification operations
+ */
+public class ProjectManager {
+    private final ProjectRepository projectRepository;
+    private final ManagerRepository managerRepository;
+
+    /**
+     * Constructs a ProjectManager with default repositories
+     */
+    public ProjectManager() {
+        this.projectRepository = ProjectRepository.getInstance();
+        this.managerRepository = ManagerRepository.getInstance();
+    }
+
+    /**
+     * Creates a new project with the given details
+     */
+    public Project createProject(String projectID, String targetedUserGroup, boolean visibility,
+                                 String projectName, String neighborhood,
+                                 int twoRoomFlatsAvailable, int threeRoomFlatsAvailable,
+                                 double twoRoomFlatsPrice, double threeRoomFlatsPrice,
+                                 LocalDate applicationOpeningDate, LocalDate applicationClosingDate,
+                                 Manager managerInCharge, Officer creatingOfficer) {
+
+        validateProjectData(projectName, managerInCharge);
+
+        Project project = new Project(projectID, targetedUserGroup, visibility, projectName,
+                neighborhood, twoRoomFlatsAvailable, threeRoomFlatsAvailable,
+                twoRoomFlatsPrice, threeRoomFlatsPrice,
+                applicationOpeningDate, applicationClosingDate, managerInCharge);
+
+        // Assign the creating officer to the project
+        project.assignOfficer(creatingOfficer);
+
+        // Add to repository
+        projectRepository.getAll().add(project);
+
+        return project;
+    }
+
+    /**
+     * Validates project data before creation
+     */
+    private void validateProjectData(String projectName, Manager managerInCharge) {
+        if (projectName == null || projectName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Project name cannot be empty");
+        }
+
+        if (managerInCharge == null) {
+            throw new IllegalArgumentException("A manager must be assigned to the project");
+        }
+
+        // Check for duplicate project names
+        for (Project existingProject : projectRepository.getAll()) {
+            if (existingProject.getProjectName().equals(projectName)) {
+                throw new IllegalArgumentException("A project with this name already exists");
+            }
+        }
+    }
+
+    /**
+     * Assigns an officer to a project
+     */
+    public boolean assignOfficerToProject(Project project, Officer officer) {
+        if (project == null || officer == null) {
+            return false;
+        }
+        // Check if maximum number of officers is reached
+        if (project.getNumOfficers() >= 10) {
+            return false;
+        }
+
+        // Check if already assigned
+        if (project.getAssignedOfficers().contains(officer)) {
+            return false;
+        }
+
+        return project.assignOfficer(officer);
+    }
+
+    /**
+     * Removes an officer from a project
+     */
+    public boolean removeOfficerFromProject(Project project, Officer officer) {
+        if (project == null || officer == null) {
+            return false;
+        }
+
+        return project.removeOfficer(officer);
+    }
+
+    /**
+     * Gets all projects an officer is assigned to
+     */
+    public List<Project> getOfficerProjects(Officer officer) {
+        List<Project> officerProjects = new ArrayList<>();
+
+        for (Project project : projectRepository.getAll()) {
+            if (project.getAssignedOfficers().contains(officer)) {
+                officerProjects.add(project);
+            }
+        }
+
+        return officerProjects;
+    }
+
+    /**
+     * Updates project visibility
+     */
+    public void updateProjectVisibility(Project project, boolean visibility) {
+        project.setVisibility(visibility);
+    }
+
+    /**
+     * Updates project application dates
+     */
+    public void updateProjectDates(Project project, LocalDate openingDate, LocalDate closingDate) {
+        if (openingDate != null) {
+            project.setApplicationOpeningDate(openingDate);
+        }
+        if (closingDate != null) {
+            project.setApplicationClosingDate(closingDate);
+        }
+    }
+
+    /**
+     * Updates project flat availability
+     */
+    public void updateFlatAvailability(Project project, int twoRoomFlats, int threeRoomFlats) {
+        project.setTwoRoomFlatsAvailable(twoRoomFlats);
+        project.setThreeRoomFlatsAvailable(threeRoomFlats);
+    }
+
+    /**
+     * Gets a project by its name
+     */
+    public Project getProjectByName(String projectName) {
+        for (Project project : projectRepository.getAll()) {
+            if (project.getProjectName().equals(projectName)) {
+                return project;
+            }
+        }
+        return null;
+    }
+}

@@ -121,6 +121,12 @@ public abstract class Repository<ModelObject extends Model> extends Savable<Mode
     public int size() {
         return listOfModelObjects.size();
     }
+    //get a id number for new model object
+    /**
+     * Gets the next available ID for a new model object.
+     *
+     * @return the next available ID
+     */
 
     /**
      * Removes all model objects from this repository.
@@ -239,4 +245,5 @@ public abstract class Repository<ModelObject extends Model> extends Savable<Mode
          */
         boolean isMatch(ModelObject modelObject);
     }
+
 }

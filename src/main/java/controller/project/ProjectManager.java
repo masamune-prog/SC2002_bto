@@ -37,7 +37,7 @@ public class ProjectManager {
 
         validateProjectData(projectName, managerInCharge);
 
-        Project project = new Project(projectID, targetedUserGroup, visibility, projectName,
+        Project project = new Project(projectID, visibility, projectName,
                 neighborhood, twoRoomFlatsAvailable, threeRoomFlatsAvailable,
                 twoRoomFlatsPrice, threeRoomFlatsPrice,
                 applicationOpeningDate, applicationClosingDate, managerInCharge);

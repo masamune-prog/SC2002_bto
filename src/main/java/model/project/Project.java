@@ -13,7 +13,6 @@ import java.util.Map;
 public class Project implements Model {
     //ProjectStatus status;
     private String projectID;
-    private String targetedUserGroup;
     private boolean visibility;
     private String projectName; // Project ID
     private String neighborhood;
@@ -30,13 +29,12 @@ public class Project implements Model {
     /**
      * Constructor for creating a new Project
      */
-    public Project(String projectID, String targetedUserGroup, boolean visibility, String projectName,
+    public Project(String projectID, boolean visibility, String projectName,
                    String neighborhood, int twoRoomFlatsAvailable, int threeRoomFlatsAvailable,
                    double twoRoomFlatsPrice, double threeRoomFlatsPrice,
                    LocalDate applicationOpeningDate, LocalDate applicationClosingDate,
                    Manager managerInCharge) {
         this.projectID = projectID;
-        this.targetedUserGroup = targetedUserGroup;
         this.visibility = visibility;
         this.projectName = projectName;
         this.neighborhood = neighborhood;
@@ -57,7 +55,6 @@ public class Project implements Model {
 
     public void fromMap(Map<String, String> map) {
         this.projectID = map.get("projectID");
-        this.targetedUserGroup = map.get("targetedUserGroup");
         this.visibility = Boolean.parseBoolean(map.get("visibility"));
         this.projectName = map.get("projectName");
         this.neighborhood = map.get("neighborhood");
@@ -108,13 +105,6 @@ public class Project implements Model {
         }
     }
 
-    public String getTargetedUserGroup() {
-        return targetedUserGroup;
-    }
-
-    public void setTargetedUserGroup(String targetedUserGroup) {
-        this.targetedUserGroup = targetedUserGroup;
-    }
 
     public boolean isVisible() {
         return visibility;

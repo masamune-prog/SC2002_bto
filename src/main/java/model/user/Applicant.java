@@ -14,7 +14,7 @@ public class Applicant implements User, Mappable {
     private int age;
     private MaritalStatus maritalStatus; // Use enum instead of String
     private String project;
-
+    private ApplicantStatus status;
     public Applicant(String applicantID, String nric, String passwordHash, String name, int age, MaritalStatus maritalStatus, String project) {
         this.applicantID = applicantID;
         this.nric = nric;
@@ -120,4 +120,10 @@ public class Applicant implements User, Mappable {
         this.project = map.get("project");
     }
 
+    public ApplicantStatus getStatus() {
+        return status;
+    }
+    public void setStatus(ApplicantStatus status) {
+        this.status = status;
+    }
 }

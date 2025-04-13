@@ -130,7 +130,15 @@ public class ProjectRepository extends Repository<Project> {
         }
         return null;
     }
-
+    //get by ID
+    public Project getProjectByID(String projectID) {
+        for (Project project : getAll()) {
+            if (project.getID().equalsIgnoreCase(projectID)) {
+                return project;
+            }
+        }
+        return null;
+    }
     public List<Project> getByNeighborhood(String neighborhood) {
         List<Project> result = new ArrayList<>();
         for (Project project : getAll()) {

@@ -1,11 +1,12 @@
 package controller.project;
 
 import model.project.Project;
+import model.user.Applicant;
 import model.user.Manager;
 import model.user.Officer;
 import repository.project.ProjectRepository;
 import repository.user.ManagerRepository;
-
+import model.user.MaritalStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -154,5 +155,49 @@ public class ProjectManager {
             }
         }
         return null;
+    }
+    public Project viewAvailableProjects(Applicant applicant) {
+        return projectRepository.getByProjectName(applicant.getProject());
+    }
+    public List<Project> getAvailableProjects(Applicant applicant) {
+        List<Project> availableProjects = new ArrayList<>();
+
+        // First, import the correct enum
+        MaritalStatus marriedStatus = MaritalStatus.MARRIED;
+        MaritalStatus singleStatus = MaritalStatus.SINGLE;
+
+        for (Project project : projectRepository.getAll()) {
+            // Check if project is visible and within application period
+            if (project.isVisible() &&
+                    project.getApplicationOpeningDate() != null &&
+                    project.getApplicationClosingDate() != null &&
+                    project.getApplicationOpeningDate().isBefore(LocalDate.now()) &&
+                    project.getApplicationClosingDate().isAfter(LocalDate.now())) {
+
+                boolean isEligible = false;
+
+                // Check if 2-room flats are available and applicant is eligible
+                if (project.getTwoRoomFlatsAvailable() > 0) {
+                    // 2-room flats: 35+ and single OR any age and married
+                    if ((applicant.getAge() >= 35 && applicant.getMaritalStatus() == singleStatus) ||
+                            applicant.getMaritalStatus() == marriedStatus) {
+                        isEligible = true;
+                    }
+                }
+
+                // Check if 3-room flats are available and applicant is eligible
+                if (project.getThreeRoomFlatsAvailable() > 0) {
+                    // 3-room flats: only for married couples
+                    if (applicant.getMaritalStatus() == marriedStatus) {
+                        isEligible = true;
+                    }
+                }
+
+                if (isEligible) {
+                    availableProjects.add(project);
+                }
+            }
+        }
+        return availableProjects;
     }
 }

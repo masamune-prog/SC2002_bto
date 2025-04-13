@@ -1,5 +1,6 @@
 package model.project;
 
+import model.Displayable;
 import model.user.Manager;
 import model.user.Officer;
 import model.Model;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Project implements Model {
+public class Project implements Model, Displayable {
     //ProjectStatus status;
     private String projectID;
     private boolean visibility;
@@ -247,4 +248,66 @@ public class Project implements Model {
     public String getID() {
         return projectID;
     }
+    private String getProjectInformationString() {
+        return "| Project Status              | %-39s |\n";
+    }
+    private String getSingleProjectString() {
+        StringBuilder display = new StringBuilder();
+
+        // Create the header
+        display.append("|--------------------------------------------------------------|\n");
+        display.append(String.format("| Project ID                  | %-30s |\n", projectID));
+        display.append(String.format("| Project Name                | %-30s |\n", projectName));
+
+
+        return display.toString();
+    }
+    @Override
+    public String getDisplayableString() {
+        StringBuilder display = new StringBuilder(getSingleProjectString());
+
+        // Add neighborhood information
+        display.append(String.format("| Neighborhood                | %-30s |\n", neighborhood));
+
+        // Add flat availability
+        display.append(String.format("| 2-Room Flats Available      | %-30d |\n", twoRoomFlatsAvailable));
+        display.append(String.format("| 3-Room Flats Available      | %-30d |\n", threeRoomFlatsAvailable));
+        display.append(String.format("| Total Flats Available       | %-30d |\n", getTotalFlatsAvailable()));
+
+        // Add pricing information
+        display.append(String.format("| 2-Room Flats Price          | $%-29.2f |\n", twoRoomFlatsPrice));
+        display.append(String.format("| 3-Room Flats Price          | $%-29.2f |\n", threeRoomFlatsPrice));
+
+        // Add dates
+        display.append(String.format("| Application Opening Date    | %-30s |\n", applicationOpeningDate));
+        display.append(String.format("| Application Closing Date    | %-30s |\n", applicationClosingDate));
+
+        // Add manager information
+        String managerName = managerInCharge != null ? managerInCharge.getName() : "Not assigned";
+        display.append(String.format("| Manager In Charge           | %-30s |\n", managerName));
+
+        // Add officer information
+        display.append(String.format("| Number of Officers          | %-30d |\n", getNumOfficers()));
+        if (!assignedOfficers.isEmpty()) {
+            display.append("| Assigned Officers:          |                                |\n");
+            for (Officer officer : assignedOfficers) {
+                display.append(String.format("|    %-25s | %-30s |\n", "", officer.getName()));
+            }
+        }
+
+        // Add visibility information
+        display.append(String.format("| Visibility                  | %-30s |\n", visibility ? "Visible" : "Hidden"));
+
+        // Close the box
+        display.append("|--------------------------------------------------------------|");
+
+        return display.toString();
+    }
+
+    @Override
+    public String getSplitter() {
+        return "\n\n";
+    }
+
+
 }

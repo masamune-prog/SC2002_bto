@@ -141,15 +141,6 @@ public class ProjectRepository extends Repository<Project> {
         return result;
     }
 
-    public List<Project> getByUserGroup(String targetedUserGroup) {
-        List<Project> result = new ArrayList<>();
-        for (Project project : getAll()) {
-            if (project.getTargetedUserGroup().equalsIgnoreCase(targetedUserGroup)) {
-                result.add(project);
-            }
-        }
-        return result;
-    }
 
     public List<Project> getByManager(String managerName) {
         List<Project> result = new ArrayList<>();

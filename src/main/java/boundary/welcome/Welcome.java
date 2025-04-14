@@ -4,6 +4,7 @@ package boundary.welcome;
 //import boundary.account.LoginUI;
 import boundary.account.ForgetUserID;
 import boundary.account.LoginUI;
+import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
 import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
@@ -38,6 +39,8 @@ public class Welcome {
             }
         } catch (PageBackException e) {
             welcome();
+        } catch (ModelNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 }

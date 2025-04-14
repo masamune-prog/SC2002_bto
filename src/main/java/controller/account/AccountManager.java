@@ -137,7 +137,10 @@ public class AccountManager {
                 ManagerRepository.getInstance().isEmpty() &&
                 OfficerRepository.getInstance().isEmpty();
     }
-
+    public static boolean checkUserExists(String userNRIC, UserType userType) throws ModelNotFoundException {
+        User user = UserFinder.findUser(userNRIC, userType);
+        return user != null;
+    }
     public static List<User> getUsersByUserName(String userName) {
         List<User> users = new ArrayList<>();
 

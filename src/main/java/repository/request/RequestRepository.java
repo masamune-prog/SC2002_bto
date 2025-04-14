@@ -2,6 +2,7 @@ package repository.request;
 
 import model.request.Request;
 import repository.Repository;
+import repository.user.ApplicantRepository;
 import utils.exception.ModelNotFoundException;
 
 import java.util.ArrayList;

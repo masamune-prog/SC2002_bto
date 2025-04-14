@@ -22,7 +22,7 @@ public class LoginUI {
      *
      * @throws PageBackException if the user chooses to go back to the previous page.
      */
-    public static void login() throws PageBackException {
+    public static void login() throws PageBackException, ModelNotFoundException {
         ChangePage.changePage();
         UserType userType = AttributeGetter.getDomain();
         String userNRIC = AttributeGetter.getUserNRIC();
@@ -39,7 +39,18 @@ public class LoginUI {
         //System.out.println(userType);
         //System.out.println(userNRIC);
         //System.out.println(password);
+        boolean accountExist = AccountManager.checkUserExists(userNRIC, userType);
+        //check if the userNRIC is valid
+        //if not, throw ModelNotFoundException
+        if (!accountExist) {
+            System.out.println("Account does not exist.");
+            System.out.println("Please try again.");
+            login();
+        }
         try {
+            //check if the userNRIC is valid
+            //if not, throw ModelNotFoundException
+
             User user = AccountManager.login(userType, userNRIC, password);
             //print out the user passed into AccountManager
             switch (userType) {

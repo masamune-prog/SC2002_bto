@@ -5,6 +5,7 @@ import boundary.account.Logout;
 import boundary.account.ViewApplicantProfile;
 import boundary.modelviewer.ModelViewer;
 import boundary.modelviewer.ProjectViewer;
+import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 import controller.request.ApplicantManager;
 import model.project.Project;
@@ -15,12 +16,15 @@ import model.user.User;
 import model.user.UserType;
 import repository.project.ProjectRepository;
 import repository.user.ApplicantRepository;
+import repository.enquiry.EnquiryRepository;
+import model.enquiry.Enquiry;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
 import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class ApplicantMainPage {
@@ -139,7 +143,7 @@ public class ApplicantMainPage {
         ChangePage.changePage();
         System.out.println("Your current application status: " + applicant.getStatus());
         if (applicant.getStatus() != ApplicantStatus.UNREGISTERED) {
-            System.out.println("Project: " + applicant.getProject());
+            System.out.println("Project: " + projectManager.getAvailableProjects(applicant));
         }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -274,11 +278,21 @@ public class ApplicantMainPage {
         throw new PageBackException();
     }
 
-    // Enquiry related placeholders
-
     private void submitEnquiry(Applicant applicant) throws PageBackException {
         ChangePage.changePage();
-        System.out.println("Submit Enquiry feature is not yet implemented.");
+        System.out.println("Submit Enquiry");
+        System.out.println("Please enter your enquiry:");
+        String question = scanner.nextLine();
+        
+        if (question.trim().isEmpty()) {
+            System.out.println("Enquiry cannot be empty. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        Enquiry enquiry = EnquiryRepository.getInstance().createEnquiry(question, applicant.getID());
+        System.out.println("Enquiry submitted successfully!");
+        System.out.println("Your enquiry ID is: " + enquiry.getEnquiryID());
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();
@@ -286,7 +300,22 @@ public class ApplicantMainPage {
 
     private void viewEnquiry(Applicant applicant) throws PageBackException {
         ChangePage.changePage();
-        System.out.println("View Enquiry feature is not yet implemented.");
+        System.out.println("View Enquiries");
+        List<Enquiry> enquiries = EnquiryRepository.getInstance().getEnquiriesByCreator(applicant.getID());
+
+        if (enquiries.isEmpty()) {
+            System.out.println("No enquiries found.");
+        } else {
+            System.out.println("Your Enquiries:");
+            System.out.println("---------------");
+            for (Enquiry enquiry : enquiries) {
+                System.out.println("Enquiry ID: " + enquiry.getEnquiryID());
+                System.out.println("Question: " + enquiry.getQuestion());
+                System.out.println("Answer: " + (enquiry.getAnswer() != null && !enquiry.getAnswer().isEmpty() 
+                    ? enquiry.getAnswer() : "Not answered yet"));
+                System.out.println("---------------");
+            }
+        }
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();
@@ -294,7 +323,47 @@ public class ApplicantMainPage {
 
     private void deleteEnquiry(Applicant applicant) throws PageBackException {
         ChangePage.changePage();
-        System.out.println("Delete Enquiry feature is not yet implemented.");
+        List<Enquiry> enquiries = EnquiryRepository.getInstance().getEnquiriesByCreator(applicant.getID());
+        System.out.println("Delete Enquiry");
+        if (enquiries.isEmpty()) {
+            System.out.println("No enquiries found.");
+        } else {
+            System.out.println("Your Enquiries:");
+            System.out.println("---------------");
+            for (Enquiry enquiry : enquiries) {
+                System.out.println("Enquiry ID: " + enquiry.getEnquiryID());
+                System.out.println("Question: " + enquiry.getQuestion());
+                System.out.println("Answer: " + (enquiry.getAnswer() != null && !enquiry.getAnswer().isEmpty()
+                        ? enquiry.getAnswer() : "Not answered yet"));
+                System.out.println("---------------");
+            }
+        }
+        System.out.println("Please enter the enquiry ID to delete:");
+        String enquiryID = scanner.nextLine();
+        
+        Enquiry enquiry = EnquiryRepository.getInstance().getByID(enquiryID);
+        if (enquiry == null) {
+            System.out.println("Enquiry not found. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        if (!enquiry.getCreatorID().equals(applicant.getID())) {
+            System.out.println("You can only delete your own enquiries. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        System.out.print("Are you sure you want to delete this enquiry? (Y/N): ");
+        String confirm = scanner.nextLine().toUpperCase();
+        
+        if (confirm.equals("Y")) {
+            EnquiryRepository.getInstance().deleteEnquiry(enquiryID);
+            System.out.println("Enquiry deleted successfully!");
+        } else {
+            System.out.println("Deletion cancelled.");
+        }
+        
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();
@@ -302,7 +371,66 @@ public class ApplicantMainPage {
 
     private void editEnquiry(Applicant applicant) throws PageBackException {
         ChangePage.changePage();
-        System.out.println("Edit Enquiry feature is not yet implemented.");
+        System.out.println("Edit Enquiry");
+        //Show the enquiry list first
+        List<Enquiry> enquiries = EnquiryRepository.getInstance().getEnquiriesByCreator(applicant.getID());
+
+        if (enquiries.isEmpty()) {
+            System.out.println("No enquiries found.");
+        } else {
+            System.out.println("Your Enquiries:");
+            System.out.println("---------------");
+            for (Enquiry enquiry : enquiries) {
+                System.out.println("Enquiry ID: " + enquiry.getEnquiryID());
+                System.out.println("Question: " + enquiry.getQuestion());
+                System.out.println("Answer: " + (enquiry.getAnswer() != null && !enquiry.getAnswer().isEmpty()
+                        ? enquiry.getAnswer() : "Not answered yet"));
+                System.out.println("---------------");
+            }
+        }
+        System.out.println("Please enter the enquiry ID to edit:");
+        String enquiryID = scanner.nextLine();
+        
+        Enquiry enquiry = EnquiryRepository.getInstance().getByID(enquiryID);
+        if (enquiry == null) {
+            System.out.println("Enquiry not found. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        if (!enquiry.getCreatorID().equals(applicant.getID())) {
+            System.out.println("You can only edit your own enquiries. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        if (enquiry.getAnswer() != null && !enquiry.getAnswer().isEmpty()) {
+            System.out.println("Cannot edit an enquiry that has been answered.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        System.out.println("Current question: " + enquiry.getQuestion());
+        System.out.println("Enter new question:");
+        String newQuestion = scanner.nextLine();
+        
+        if (newQuestion.trim().isEmpty()) {
+            System.out.println("Question cannot be empty. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+
+        System.out.print("Are you sure you want to update this enquiry? (Y/N): ");
+        String confirm = scanner.nextLine().toUpperCase();
+        
+        if (confirm.equals("Y")) {
+            enquiry.setQuestion(newQuestion);
+            System.out.println("Enquiry updated successfully!");
+        } else {
+            System.out.println("Update cancelled.");
+        }
+        
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();

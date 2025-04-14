@@ -5,6 +5,7 @@ import model.project.Project;
 import model.project.ProjectStatus;
 import model.user.Applicant;
 import model.user.ApplicantStatus;
+import model.user.MaritalStatus;
 import repository.project.ProjectRepository;
 import repository.user.ManagerRepository;
 import utils.exception.ModelNotFoundException;
@@ -144,10 +145,56 @@ public class ProjectViewer {
             System.out.println("You are not allowed to view available projects as you are already registered to a project.");
         } else {
             System.out.println("View Available Project List");
+            System.out.println("Your eligibility criteria:");
+            System.out.println("- Age: " + applicant.getAge());
+            System.out.println("- Marital Status: " + applicant.getMaritalStatus());
+            System.out.println("\nAvailable Projects:");
+            
             List<Project> availableProjects = projectManager.getAvailableProjects(applicant);
-            ModelViewer.displayListOfDisplayable(availableProjects);
+            if (availableProjects.isEmpty()) {
+                System.out.println("No projects are currently available for your eligibility criteria.");
+            } else {
+                for (Project project : availableProjects) {
+                    System.out.println("\nProject Details:");
+                    System.out.println("---------------");
+                    System.out.println("Project Name: " + project.getProjectName());
+                    System.out.println("Neighborhood: " + project.getNeighborhood());
+                    System.out.println("Application Period: " + project.getApplicationOpeningDate() + " to " + project.getApplicationClosingDate());
+                    
+                    // Display flat availability
+                    System.out.println("\nFlat Availability:");
+                    if (project.getTwoRoomFlatsAvailable() > 0) {
+                        System.out.println("- 2-Room Flats: " + project.getTwoRoomFlatsAvailable() + " available");
+                        System.out.println("  Price: $" + project.getTwoRoomFlatsPrice());
+                    }
+                    if (project.getThreeRoomFlatsAvailable() > 0) {
+                        System.out.println("- 3-Room Flats: " + project.getThreeRoomFlatsAvailable() + " available");
+                        System.out.println("  Price: $" + project.getThreeRoomFlatsPrice());
+                    }
+                    
+                    // Display eligibility information
+                    System.out.println("\nEligibility for this project:");
+                    if (project.getTwoRoomFlatsAvailable() > 0) {
+                        if (applicant.getMaritalStatus() == MaritalStatus.MARRIED) {
+                            System.out.println("- Eligible for 2-Room Flats: Yes (Married)");
+                        } else if (applicant.getAge() >= 35) {
+                            System.out.println("- Eligible for 2-Room Flats: Yes (Age 35+)");
+                        } else {
+                            System.out.println("- Eligible for 2-Room Flats: No (Must be married or 35+)");
+                        }
+                    }
+                    if (project.getThreeRoomFlatsAvailable() > 0) {
+                        if (applicant.getMaritalStatus() == MaritalStatus.MARRIED) {
+                            System.out.println("- Eligible for 3-Room Flats: Yes (Married)");
+                        } else {
+                            System.out.println("- Eligible for 3-Room Flats: No (Must be married)");
+                        }
+                    }
+                    System.out.println("---------------");
+                }
+            }
         }
-        System.out.println("Press Enter to go back.");
+        System.out.println("\nPress Enter to go back.");
         new Scanner(System.in).nextLine();
         throw new PageBackException();
     }

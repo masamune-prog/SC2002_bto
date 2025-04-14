@@ -27,13 +27,15 @@ public class EnquiryManager {
      * @param question  the question text
      * @return the created enquiry
      */
-    public Enquiry createEnquiry(String enquiryID, String question) {
+    public Enquiry createEnquiry(String enquiryID, String question, String creatorID) {
         validateEnquiryData(question);
 
-        Enquiry enquiry = new Enquiry(enquiryID, question, null);
+        Enquiry enquiry = new Enquiry(enquiryID, question, creatorID);
         enquiryRepository.getAll().add(enquiry);
         return enquiry;
     }
+
+
 
     /**
      * Answers an existing enquiry
@@ -103,7 +105,9 @@ public class EnquiryManager {
                 .filter(enquiry -> enquiry.getAnswer() == null || enquiry.getAnswer().isEmpty())
                 .collect(Collectors.toList());
     }
-
+    public static List<Enquiry> getAllEnquiries() {
+        return EnquiryRepository.getInstance().getAll();
+    }
     /**
      * Validates enquiry data before creation or update
      *

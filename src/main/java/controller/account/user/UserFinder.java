@@ -52,11 +52,11 @@ public class UserFinder {
      * @return the user with the specified ID
      * @throws ModelNotFoundException if the user is not found
      */
-    public static User findUser(String userID, UserType userType) throws ModelNotFoundException {
+    public static User findUser(String userNRIC, UserType userType) throws ModelNotFoundException {
         return switch (userType) {
-            case APPLICANT -> findApplicant(userID);
-            case OFFICER -> findOfficer(userID);
-            case MANAGER -> findManager(userID);
+            case APPLICANT -> findApplicant(userNRIC);
+            case OFFICER -> findOfficer(userNRIC);
+            case MANAGER -> findManager(userNRIC);
         };
     }
 }

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.File;
 
 public class OfficerRepository extends Repository<Officer> {
 
@@ -17,6 +18,7 @@ public class OfficerRepository extends Repository<Officer> {
 
     protected OfficerRepository() {
         super();
+        load();
     }
 
     public static OfficerRepository getInstance() {
@@ -35,9 +37,23 @@ public class OfficerRepository extends Repository<Officer> {
     @Override
     public void load() {
         this.getAll().clear();
-        List<List<String>> csvData = CSVReader.read(getFilePath(), true);
-        List<Map<String, String>> mappedData = convertToMapList(csvData);
-        setAll(mappedData);
+        String txtFilePath = getFilePath().replace(".csv", ".txt");
+        File txtFile = new File(txtFilePath);
+        
+        if (txtFile.exists()) {
+            // Load from .txt file
+            load(txtFilePath);
+            System.out.println("Loaded officer data from: " + txtFilePath);
+        } else {
+            // If .txt doesn't exist, load from CSV
+            System.out.println("No .txt file found, loading from CSV: " + getFilePath());
+            List<List<String>> csvData = CSVReader.read(getFilePath(), true);
+            List<Map<String, String>> mappedData = convertToMapList(csvData);
+            setAll(mappedData);
+            // Save to .txt file for future use
+            save(txtFilePath);
+            System.out.println("Created new .txt file: " + txtFilePath);
+        }
     }
 
     public Officer getOfficerByName(String name) {

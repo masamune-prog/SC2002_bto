@@ -8,10 +8,10 @@ public class ProjectApplicationRequest implements Request {
     private RequestStatus status;
     private String managerID;
     private String applicantID;
-    private String roomType;
+    private RoomType roomType;
 
     public ProjectApplicationRequest(String requestID, String projectID, RequestStatus status,
-                                     String managerID, String applicantID, String roomType) {
+                                     String managerID, String applicantID, RoomType roomType) {
         this.requestID = requestID;
         this.projectID = projectID;
         this.status = status;
@@ -58,7 +58,7 @@ public class ProjectApplicationRequest implements Request {
         return applicantID;
     }
 
-    public String getRoomType() {
+    public RoomType getRoomType() {
         return roomType;
     }
 
@@ -82,7 +82,7 @@ public class ProjectApplicationRequest implements Request {
         this.status = RequestStatus.valueOf(map.get("status"));
         this.managerID = map.get("managerID");
         this.applicantID = map.get("applicantID");
-        this.roomType = map.get("roomType");
+        this.roomType = RoomType.valueOf(map.get("roomType"));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class ProjectApplicationRequest implements Request {
                 "status", status.toString(),
                 "managerID", managerID,
                 "applicantID", applicantID,
-                "roomType", roomType
+                "roomType", roomType.toString()
         );
         return map;
     }

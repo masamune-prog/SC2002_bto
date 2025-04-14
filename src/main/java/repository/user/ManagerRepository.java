@@ -35,6 +35,14 @@ public class ManagerRepository extends Repository<Manager> {
         }
         return null;
     }
+    public Manager getByNRIC(String nric) {
+        for (Manager manager : getAll()) {
+            if (manager.getNric().equals(nric)) {
+                return manager;
+            }
+        }
+        return null;
+    }
     @Override
     public void load() {
         this.getAll().clear();

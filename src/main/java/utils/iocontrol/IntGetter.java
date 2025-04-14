@@ -13,11 +13,14 @@ public class IntGetter {
      * @return the integer value read from the console input.
      */
     public static int readInt() {
-        try {
-            return new Scanner(System.in).nextInt();
-        } catch (Exception e) {
-            System.out.println("Please enter a valid integer.");
-            return readInt();
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            try {
+                return scanner.nextInt();
+            } catch (Exception e) {
+                System.out.println("Please enter a valid integer.");
+                scanner.nextLine(); // Clear the scanner buffer
+            }
         }
     }
 }

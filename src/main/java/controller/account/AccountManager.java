@@ -11,27 +11,39 @@ import utils.config.Location;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PasswordIncorrectException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class that manages user accounts and data loading
  */
 public class AccountManager {
-    public static User login(UserType userType, String userID, String password)
+    public static User login(UserType userType, String userNRIC, String password)
             throws PasswordIncorrectException, ModelNotFoundException {
-        User user = UserFinder.findUser(userID, userType);
-//        System.err.println("User found: " + user.getUserName() + " " + user.getID());
+        //get userID from userNRIC
+        User user = UserFinder.findUser(userNRIC, userType);
+        System.out.println("User found: " + user.getNric() + " " + user.getID());
+        // Check if user exists
+        if (user == null) {
+            throw new ModelNotFoundException("User with NRIC " + userNRIC + " not found");
+        }
+
+        //System.err.println("User found: " + user.getNric() + " " + user.getID());
         if (PasswordManager.checkPassword(user, password)) {
             return user;
         } else {
+            // Throw the exception instead of returning null
             throw new PasswordIncorrectException();
         }
     }
     //TODO: Add method for registration of new users and updating of user password
-    public static void changePassword(UserType userType, String userID, String oldPassword, String newPassword)
+    public static void changePassword(UserType userType, String userNRIC, String oldPassword, String newPassword)
             throws PasswordIncorrectException, ModelNotFoundException {
-        User user = UserFinder.findUser(userID, userType);
+        User user = UserFinder.findUser(userNRIC, userType);
         PasswordManager.changePassword(user, oldPassword, newPassword);
         UserUpdater.updateUser(user);
     }
+
     /**
      * Loads the applicants from the CSV file
      */
@@ -100,6 +112,7 @@ public class AccountManager {
             e.printStackTrace();
         }
     }
+
     /**
      * Loads all users (Applicants, Managers, Officers) from CSV files
      */
@@ -113,6 +126,7 @@ public class AccountManager {
 
         System.out.println("All users loaded successfully.");
     }
+
     /**
      * Checks if all user repositories are empty
      *
@@ -122,5 +136,35 @@ public class AccountManager {
         return ApplicantRepository.getInstance().isEmpty() &&
                 ManagerRepository.getInstance().isEmpty() &&
                 OfficerRepository.getInstance().isEmpty();
+    }
+
+    public static List<User> getUsersByUserName(String userName) {
+        List<User> users = new ArrayList<>();
+
+        // Search in applicants repository
+        ApplicantRepository applicantRepo = ApplicantRepository.getInstance();
+        for (Applicant applicant : applicantRepo.getAll()) {
+            if (applicant.getName() != null && applicant.getName().equals(userName)) {
+                users.add(applicant);
+            }
+        }
+
+        // Search in managers repository
+        ManagerRepository managerRepo = ManagerRepository.getInstance();
+        for (Manager manager : managerRepo.getAll()) {
+            if (manager.getName() != null && manager.getName().equals(userName)) {
+                users.add(manager);
+            }
+        }
+
+        // Search in officers repository
+        OfficerRepository officerRepo = OfficerRepository.getInstance();
+        for (Officer officer : officerRepo.getAll()) {
+            if (officer.getName() != null && officer.getName().equals(userName)) {
+                users.add(officer);
+            }
+        }
+
+        return users;
     }
 }

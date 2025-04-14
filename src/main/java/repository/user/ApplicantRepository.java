@@ -18,7 +18,30 @@ public class ApplicantRepository extends Repository<Applicant> {
         super();
         load();
     }
-
+    public Applicant getByID(String id) {
+        for (Applicant applicant : getAll()) {
+            if (applicant.getID().equals(id)) {
+                return applicant;
+            }
+        }
+        return null;
+    }
+    public Applicant getByNRIC(String nric) {
+        for (Applicant applicant : getAll()) {
+            if (applicant.getNric().equals(nric)) {
+                return applicant;
+            }
+        }
+        return null;
+    }
+//    public Applicant getByName(String name) {
+//        for (Applicant applicant : getAll()) {
+//            if (applicant.getName().equals(name)) {
+//                return applicant;
+//            }
+//        }
+//        return null;
+//    }
     public static ApplicantRepository getInstance() {
         return new ApplicantRepository();
     }
@@ -35,7 +58,14 @@ public class ApplicantRepository extends Repository<Applicant> {
         List<Map<String, String>> mappedData = convertToMapList(csvData);
         setAll(mappedData);
     }
-
+    public Applicant getApplicantByName(String name) {
+        for (Applicant applicant : getAll()) {
+            if (applicant.getName().equals(name)) {
+                return applicant;
+            }
+        }
+        return null;
+    }
     private List<Map<String, String>> convertToMapList(List<List<String>> csvData) {
         List<Map<String, String>> result = new ArrayList<>();
 

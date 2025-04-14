@@ -14,12 +14,12 @@ public class UserFinder {
     /**
      * Finds the applicant with the specified ID.
      *
-     * @param userID the ID of the applicant to be found
+     * @param userNRIC nric of the applicant to be found
      * @return the applicant with the specified ID
      * @throws ModelNotFoundException if the applicant is not found
      */
-    private static User findApplicant(String userID) throws ModelNotFoundException {
-        return ApplicantRepository.getInstance().getByID(userID);
+    private static User findApplicant(String userNRIC) throws ModelNotFoundException {
+        return ApplicantRepository.getInstance().getByNRIC(userNRIC);
     }
 
     /**
@@ -29,8 +29,8 @@ public class UserFinder {
      * @return the officer with the specified ID
      * @throws ModelNotFoundException if the officer is not found
      */
-    private static User findOfficer(String userID) throws ModelNotFoundException {
-        return OfficerRepository.getInstance().getByID(userID);
+    private static User findOfficer(String userNRIC) throws ModelNotFoundException {
+        return OfficerRepository.getInstance().getByNRIC(userNRIC);
     }
 
     /**
@@ -40,8 +40,8 @@ public class UserFinder {
      * @return the manager with the specified ID
      * @throws ModelNotFoundException if the manager is not found
      */
-    private static User findManager(String userID) throws ModelNotFoundException {
-        return ManagerRepository.getInstance().getByID(userID);
+    private static User findManager(String userNRIC) throws ModelNotFoundException {
+        return ManagerRepository.getInstance().getByNRIC(userNRIC);
     }
 
     /**

@@ -243,7 +243,6 @@ public class Project implements Model, Displayable {
     public void setNumOfficers(int numOfficers) {
         this.numOfficers = numOfficers;
     }
-
     @Override
     public String getID() {
         return projectID;

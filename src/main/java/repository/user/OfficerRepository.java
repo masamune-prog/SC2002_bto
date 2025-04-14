@@ -48,7 +48,14 @@ public class OfficerRepository extends Repository<Officer> {
         }
         return null;
     }
-
+    public Officer getByNRIC(String nric) {
+        for (Officer officer : getAll()) {
+            if (officer.getNric() != null && officer.getNric().equals(nric)) {
+                return officer;
+            }
+        }
+        return null;
+    }
     private List<Map<String, String>> convertToMapList(List<List<String>> csvData) {
         List<Map<String, String>> result = new ArrayList<>();
 
@@ -88,7 +95,7 @@ public class OfficerRepository extends Repository<Officer> {
             try {
                 Officer officer = new Officer(map);
                 // Debug output to see what's happening
-                System.out.println("Created officer: ID=" + officer.getID() + ", Name=" + officer.getName() + ", NRIC=" + officer.getNric());
+                //System.out.println("Created officer: ID=" + officer.getID() + ", Name=" + officer.getName() + ", NRIC=" + officer.getNric());
                 getAll().add(officer);
             } catch (Exception e) {
                 System.err.println("Error parsing officer data: " + e.getMessage());

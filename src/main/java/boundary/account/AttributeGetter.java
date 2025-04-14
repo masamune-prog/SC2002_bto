@@ -78,4 +78,14 @@ public class AttributeGetter {
         System.out.print("Please enter your username: ");
         return scanner.nextLine();
     }
+    /**
+     * Prompts the user to enter their NRIC.
+     *
+     * @return The NRIC entered by the user.
+     */
+    public static String getUserNRIC() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Please enter your NRIC: ");
+        return scanner.nextLine();
+    }
 }

@@ -18,6 +18,8 @@ public class PasswordManager {
 //        System.err.println("Checking password...");
 //        System.err.println("User password: " + user.getHashedPassword());
 //        System.err.println("Input password: " + PasswordHashManager.hashPassword(password));
+        //System.out.println(user);
+        //System.out.println(password);
         return user.getHashedPassword().equals(PasswordHashManager.hashPassword(password));
     }
 

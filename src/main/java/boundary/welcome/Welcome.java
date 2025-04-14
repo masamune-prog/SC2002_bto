@@ -3,6 +3,7 @@ package boundary.welcome;
 //import boundary.account.ForgetUserID;
 //import boundary.account.LoginUI;
 import boundary.account.ForgetUserID;
+import boundary.account.LoginUI;
 import utils.exception.PageBackException;
 import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
@@ -18,7 +19,7 @@ public class Welcome {
     public static void welcome() {
         ChangePage.changePage();
         System.out.println(BoundaryStrings.WELCOME_LOGO);
-        System.out.println("Welcome to the Final Year Project Management System!\n");
+        System.out.println("Welcome to the BTO Management System!\n");
         System.out.println(BoundaryStrings.separator);
         System.out.println("Please enter your choice to continue.");
         System.out.println("\t1. Login");

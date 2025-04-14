@@ -5,12 +5,14 @@ public class OfficerApplicationRequest implements Request{
     private String projectID;
     private RequestStatus status;
     private String managerID;
+    private String officerID;
 
-    public OfficerApplicationRequest(String ID, String projectID, RequestStatus status, String managerID) {
+    public OfficerApplicationRequest(String ID, String projectID, RequestStatus status, String managerID, String officerID) {
         this.requestID = ID;
         this.projectID = projectID;
         this.status = status;
         this.managerID = managerID;
+        this.officerID = officerID;
     }
     public OfficerApplicationRequest(Map<String, String> map) {
         fromMap(map);
@@ -44,7 +46,9 @@ public class OfficerApplicationRequest implements Request{
     public String getManagerID() {
         return managerID;
     }
-
+    public String getOfficerID() {
+        return officerID;
+    }
     @Override
     public String getDisplayableString() {
         return getSplitter() + "\n" +

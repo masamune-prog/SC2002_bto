@@ -25,7 +25,27 @@ public class ProjectManager {
         this.projectRepository = ProjectRepository.getInstance();
         this.managerRepository = ManagerRepository.getInstance();
     }
+    public static void loadProjectsFromCSV() {
+        ProjectRepository projectRepository = ProjectRepository.getInstance();
+        String filePath = projectRepository.getFilePath();
+        System.out.println("Loading projects from: " + filePath);
 
+        try {
+            projectRepository.load();
+            System.out.println("Projects loaded successfully. Count: " + projectRepository.getAll().size());
+
+            // Debug output
+            for (Project project : projectRepository.getAll()) {
+                System.out.println("Loaded project: " + project.getProjectName() +
+                        " (ID: " + project.getID() +
+                        ", Flats: 2R=" + project.getTwoRoomFlatsAvailable() +
+                        ", 3R=" + project.getThreeRoomFlatsAvailable() + ")");
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading projects: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
     /**
      * Creates a new project with the given details
      */
@@ -156,9 +176,11 @@ public class ProjectManager {
         }
         return null;
     }
+    //method to see simply all projects
     public Project viewAvailableProjects(Applicant applicant) {
         return projectRepository.getByProjectName(applicant.getProject());
     }
+    //method to see all filtered available projects
     public List<Project> getAvailableProjects(Applicant applicant) {
         List<Project> availableProjects = new ArrayList<>();
 

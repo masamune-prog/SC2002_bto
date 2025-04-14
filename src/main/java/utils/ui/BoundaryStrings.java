@@ -15,7 +15,7 @@ public class BoundaryStrings {
      */
     public static final String WELCOME_LOGO =
             """
-              ____ _____ ___  __  __ ____  
+             ____ _____ ___  __  __ ____  
              | __ )_   _/ _ \\|  \\/  / ___| 
              |  _ \\ | || | | | |\\/| \\___ \\ 
              | |_) || || |_| | |  | |___) |

@@ -1,6 +1,7 @@
 package model.user;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 
 import model.project.Project;
 public class Officer implements User {
@@ -16,16 +17,20 @@ public class Officer implements User {
      * @param nric          the NRIC of the officer.
      * @param name          the name of the officer.
      */
-    public Officer(String officerID, String nric, String hashedPassword, String name,String project,
+    public Officer(String officerID, String nric, String hashedPassword, String name, String project,
                    List<String> projectsInCharge) {
+        this.officerID = officerID;
         this.nric = nric;
         this.hashedPassword = hashedPassword;
         this.name = name;
-        this.projectsInCharge = projectsInCharge;
+        this.projectsInCharge = projectsInCharge != null ? projectsInCharge : new ArrayList<>();
     }
+
     public Officer(Map<String, String> informationMap) {
+        this.projectsInCharge = new ArrayList<>(); // Initialize empty list
         fromMap(informationMap);
     }
+
     @Override
     public String getID() {
         return this.officerID;
@@ -69,12 +74,23 @@ public class Officer implements User {
 
     @Override
     public void fromMap(Map<String, String> map) {
-        this.officerID = map.get("officerID");
-        this.nric = map.get("NRIC");
-        this.hashedPassword = map.get("hashedPassword");
-        this.name = map.get("Name");
-        // Initialize projectsInCharge if needed (might be null at first)
-        // We'll need to implement project assignment separately
+        this.officerID = map.getOrDefault("officerID", "");
+        this.nric = map.getOrDefault("NRIC", "");
+        this.hashedPassword = map.getOrDefault("hashedPassword", "");
+        this.name = map.getOrDefault("Name", "");
+        this.projectsInCharge = new ArrayList<>(); // Initialize empty list
+        
+        // Debug output
+        System.out.println("Creating officer from map: " + 
+                         "ID=" + this.officerID + 
+                         ", Name=" + this.name + 
+                         ", NRIC=" + this.nric);
+        
+        // Validate required fields
+        if (this.officerID.isEmpty() || this.nric.isEmpty() || this.name.isEmpty()) {
+            System.err.println("Warning: Officer missing required fields - ID: " + this.officerID + 
+                             ", NRIC: " + this.nric + ", Name: " + this.name);
+        }
     }
 
     public List<String> getProjectsInCharge() {

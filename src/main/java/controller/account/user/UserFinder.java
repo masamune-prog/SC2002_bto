@@ -21,6 +21,9 @@ public class UserFinder {
     private static User findApplicant(String userNRIC) throws ModelNotFoundException {
         return ApplicantRepository.getInstance().getByNRIC(userNRIC);
     }
+    private static User findApplicantByID(String ID) throws ModelNotFoundException {
+        return ApplicantRepository.getInstance().getByID(ID);
+    }
 
     /**
      * Finds the officer with the specified ID.
@@ -31,6 +34,9 @@ public class UserFinder {
      */
     private static User findOfficer(String userNRIC) throws ModelNotFoundException {
         return OfficerRepository.getInstance().getByNRIC(userNRIC);
+    }
+    private static User findOfficerByID(String ID) throws ModelNotFoundException {
+        return OfficerRepository.getInstance().getByID(ID);
     }
 
     /**
@@ -43,7 +49,9 @@ public class UserFinder {
     private static User findManager(String userNRIC) throws ModelNotFoundException {
         return ManagerRepository.getInstance().getByNRIC(userNRIC);
     }
-
+    private static User findManagerByID(String ID) throws ModelNotFoundException {
+        return ManagerRepository.getInstance().getByID(ID);
+    }
     /**
      * Finds the user with the specified ID.
      *
@@ -57,6 +65,13 @@ public class UserFinder {
             case APPLICANT -> findApplicant(userNRIC);
             case OFFICER -> findOfficer(userNRIC);
             case MANAGER -> findManager(userNRIC);
+        };
+    }
+    public static User findUserByID(String userID, UserType userType) throws ModelNotFoundException {
+        return switch (userType) {
+            case APPLICANT -> findApplicantByID(userID);
+            case OFFICER -> findOfficerByID(userID);
+            case MANAGER -> findManagerByID(userID);
         };
     }
 }

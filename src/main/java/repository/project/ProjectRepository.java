@@ -19,7 +19,6 @@ public class ProjectRepository extends Repository<Project> {
     private static final String FILE_PATH = "\\ProjectList.csv";
     private static ProjectRepository instance;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("d/M/yyyy");
-
     private ProjectRepository() {
         super();
         load();
@@ -160,7 +159,17 @@ public class ProjectRepository extends Repository<Project> {
         }
         return result;
     }
-
+    public String getNewProjectID() {
+        //get the largest projectID in the list and add 1
+        int maxID = 0;
+        for (Project project : getAll()) {
+            int id = Integer.parseInt(project.getID());
+            if (id > maxID) {
+                maxID = id;
+            }
+        }
+        return String.valueOf(maxID + 1);
+    }
     public List<Project> getActiveProjects() {
         List<Project> result = new ArrayList<>();
         LocalDate today = LocalDate.now();

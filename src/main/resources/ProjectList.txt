@@ -1,0 +1,1 @@
+applicationClosingDate2025-03-20visibilitytruethreeRoomFlatsPrice450000.0applicationOpeningDate2025-02-15twoRoomFlatsPrice350000.0managerInChargemodel.user.Manager@9a7504cassignedOfficers[]twoRoomFlatsAvailable2numOfficers3neighborhoodYishunprojectNameAcacia BreezeprojectID1threeRoomFlatsAvailable3

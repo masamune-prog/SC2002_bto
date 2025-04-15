@@ -5,8 +5,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A utility class for reading CSV files and returning their
@@ -34,30 +32,40 @@ public class CSVReader {
                 br.readLine();
             }
             while ((line = br.readLine()) != null) {
-                List<String> row = new ArrayList<>();
-                // Define a regex pattern to match the CSV values
-                Pattern pattern = Pattern.compile("\"([^\"]*)\"|(?<=,|^)([^,]*)(?=,|$)");
-                Matcher matcher = pattern.matcher(line);
-                // Extract the CSV values from the line
-                while (matcher.find()) {
-                    String value = matcher.group().replace("\"", "");
-                    // Ignore spaces at the beginning of the value
-                    while (value.startsWith(" ")) {
-                        value = value.substring(1);
-                    }
-                    // Ignore spaces at the end of the value
-                    while (value.endsWith(" ")) {
-                        value = value.substring(0, value.length() - 1);
-                    }
-                    row.add(value);
+                line = line.trim();
+                if (line.isEmpty()) {
+                    continue; // Skip empty lines
                 }
-                // Add the row to the list if it's not empty or null
-                if (row.size() > 0 && !row.get(0).equals("")) {
+                
+                List<String> row = new ArrayList<>();
+                StringBuilder currentValue = new StringBuilder();
+                boolean inQuotes = false;
+                
+                for (int i = 0; i < line.length(); i++) {
+                    char c = line.charAt(i);
+                    
+                    if (c == '"') {
+                        inQuotes = !inQuotes;
+                    } else if (c == ',' && !inQuotes) {
+                        // End of value
+                        row.add(currentValue.toString().trim());
+                        currentValue = new StringBuilder();
+                    } else {
+                        currentValue.append(c);
+                    }
+                }
+                
+                // Add the last value
+                row.add(currentValue.toString().trim());
+                
+                // Only add non-empty rows
+                if (!row.isEmpty() && !row.get(0).isEmpty()) {
                     list.add(row);
                 }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return list;

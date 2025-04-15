@@ -49,22 +49,22 @@ public class ProjectManager {
     /**
      * Creates a new project with the given details
      */
-    public Project createProject(String projectID, String targetedUserGroup, boolean visibility,
+    public Project createProject(boolean visibility,
                                  String projectName, String neighborhood,
                                  int twoRoomFlatsAvailable, int threeRoomFlatsAvailable,
                                  double twoRoomFlatsPrice, double threeRoomFlatsPrice,
                                  LocalDate applicationOpeningDate, LocalDate applicationClosingDate,
-                                 Manager managerInCharge, Officer creatingOfficer) {
+                                 Manager managerInCharge) {
 
         validateProjectData(projectName, managerInCharge);
-
+        // Generate a unique project ID
+        String projectID = projectRepository.getNewProjectID();
         Project project = new Project(projectID, visibility, projectName,
                 neighborhood, twoRoomFlatsAvailable, threeRoomFlatsAvailable,
                 twoRoomFlatsPrice, threeRoomFlatsPrice,
                 applicationOpeningDate, applicationClosingDate, managerInCharge);
 
-        // Assign the creating officer to the project
-        project.assignOfficer(creatingOfficer);
+
 
         // Add to repository
         projectRepository.getAll().add(project);

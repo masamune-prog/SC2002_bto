@@ -1,3 +1,3 @@
-hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameDanielnricT2109876HofficerID1projectsInChargenull
-hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameEmilynricS6543210IofficerID2projectsInChargenull
-hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameDavidnricT1234567JofficerID3projectsInChargenull
+hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameDanielnricT2109876HofficerID1projectsInCharge[]
+hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameEmilynricS6543210IofficerID2projectsInCharge[]
+hashedPasswordwAZ9SvTofwDbrGO2FWgoI3BZFy0bvqxnQnNF1qn9pIQ=nameDavidnricT1234567JofficerID3projectsInCharge[]

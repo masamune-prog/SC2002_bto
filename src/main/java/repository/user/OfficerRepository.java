@@ -38,7 +38,7 @@ public class OfficerRepository extends Repository<Officer> {
         this.getAll().clear();
         String txtFilePath = getFilePath().replace(".csv", ".txt");
         File txtFile = new File(txtFilePath);
-        
+
         try {
             if (txtFile.exists()) {
                 // Load from .txt file
@@ -52,13 +52,13 @@ public class OfficerRepository extends Repository<Officer> {
                     System.err.println("Warning: No data found in CSV file");
                     return;
                 }
-                
+
                 // Debug output for CSV data
                 System.out.println("CSV Data read successfully. Number of rows: " + csvData.size());
                 for (List<String> row : csvData) {
                     System.out.println("CSV Row: " + String.join(", ", row));
                 }
-                
+
                 List<Map<String, String>> mappedData = convertToMapList(csvData);
                 System.out.println("Number of mapped officers: " + mappedData.size());
                 setAll(mappedData);
@@ -66,7 +66,7 @@ public class OfficerRepository extends Repository<Officer> {
                 save(txtFilePath);
                 System.out.println("Created new .txt file: " + txtFilePath);
             }
-            
+
             // Verify loaded data
             if (getAll().isEmpty()) {
                 System.err.println("Warning: No officers were loaded");
@@ -74,9 +74,9 @@ public class OfficerRepository extends Repository<Officer> {
                 System.out.println("Successfully loaded " + getAll().size() + " officers");
                 // Print details of loaded officers
                 for (Officer officer : getAll()) {
-                    System.out.println("Loaded Officer - ID: " + officer.getID() + 
-                                     ", Name: " + officer.getName() + 
-                                     ", NRIC: " + officer.getNric());
+                    System.out.println("Loaded Officer - ID: " + officer.getID() +
+                            ", Name: " + officer.getName() +
+                            ", NRIC: " + officer.getNric());
                 }
             }
         } catch (Exception e) {
@@ -113,22 +113,22 @@ public class OfficerRepository extends Repository<Officer> {
             }
 
             Map<String, String> rowMap = new HashMap<>();
-            
+
             // Set ID based on row number (starting from 1)
             rowMap.put("officerID", String.valueOf(i + 1));
-            
+
             // Map the CSV columns to the expected fields
             // CSV format: Name,NRIC,Age,Marital Status,Password
             String name = row.get(0).trim();
             String nric = row.get(1).trim();
             String password = row.get(4).trim();
-            
+
             // Debug output for raw data
             System.out.println("Raw CSV data - Name: '" + name + "', NRIC: '" + nric + "', Password: '" + password + "'");
-            
-            rowMap.put("Name", name);
-            rowMap.put("NRIC", nric);
-            
+
+            rowMap.put("name", name);
+            rowMap.put("nric", nric);
+
             // Hash the password
             if (password != null && !password.isEmpty()) {
                 String hashedPassword = PasswordHashManager.hashPassword(password);
@@ -139,11 +139,11 @@ public class OfficerRepository extends Repository<Officer> {
             rowMap.put("projectsInCharge", "[]");
 
             result.add(rowMap);
-            
+
             // Debug output for mapped data
-            System.out.println("Mapped data - Name: '" + rowMap.get("Name") + 
-                             "', NRIC: '" + rowMap.get("NRIC") + 
-                             "', ID: " + rowMap.get("officerID"));
+            System.out.println("Mapped data - Name: '" + rowMap.get("name") +
+                    "', NRIC: '" + rowMap.get("nric") +
+                    "', ID: " + rowMap.get("officerID"));
         }
 
         return result;
@@ -156,9 +156,9 @@ public class OfficerRepository extends Repository<Officer> {
             try {
                 Officer officer = new Officer(map);
                 getAll().add(officer);
-                System.out.println("Added officer: " + officer.getName() + 
-                                 " (ID: " + officer.getID() + 
-                                 ", NRIC: " + officer.getNric() + ")");
+                System.out.println("Added officer: " + officer.getName() +
+                        " (ID: " + officer.getID() +
+                        ", NRIC: " + officer.getNric() + ")");
             } catch (Exception e) {
                 System.err.println("Error parsing officer data: " + e.getMessage());
                 e.printStackTrace();

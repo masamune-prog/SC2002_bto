@@ -1,6 +1,7 @@
 package utils.iocontrol;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static utils.iocontrol.ObjectOutputControlCharacters.DELIMITER_STRING;
 import static utils.iocontrol.ObjectOutputControlCharacters.SEPARATOR_STRING;
@@ -20,14 +21,38 @@ public class StringAndMapConvertor {
      */
     public static Map<String, String> stringToMap(String string) {
         Map<String, String> map = new HashMap<>();
-        String[] pairs = string.split(SEPARATOR_STRING);
+        
+        // Debug output
+        System.out.println("Parsing string: " + string);
+        
+        // Split by separator first, escaping the separator for regex
+        String[] pairs = string.split(Pattern.quote(SEPARATOR_STRING));
+        System.out.println("Split into pairs: " + Arrays.toString(pairs));
+        
         for (String pair : pairs) {
-            String[] keyValue = pair.split(DELIMITER_STRING);
-            if (keyValue.length != 2) {
-                throw new IllegalArgumentException("Invalid key-value pair: " + pair + " in string: " + Arrays.toString(keyValue));
+            // Skip empty pairs
+            if (pair.trim().isEmpty()) {
+                continue;
             }
-            map.put(keyValue[0], keyValue[1]);
+            
+            // Split by delimiter, escaping the delimiter for regex
+            String[] keyValue = pair.split(Pattern.quote(DELIMITER_STRING));
+            System.out.println("Split pair into key-value: " + Arrays.toString(keyValue));
+            
+            if (keyValue.length != 2) {
+                System.err.println("Warning: Invalid key-value pair format: " + pair);
+                continue; // Skip invalid pairs instead of throwing exception
+            }
+            
+            String key = keyValue[0].trim();
+            String value = keyValue[1].trim();
+            
+            // Debug output
+            System.out.println("Adding to map - Key: '" + key + "', Value: '" + value + "'");
+            
+            map.put(key, value);
         }
+        
         return map;
     }
 

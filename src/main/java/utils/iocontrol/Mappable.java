@@ -1,5 +1,6 @@
 package utils.iocontrol;
 
+import utils.exception.ModelNotFoundException;
 import utils.parameters.EmptyID;
 
 import java.lang.reflect.Field;
@@ -43,7 +44,7 @@ public interface Mappable {
      *
      * @param map the map
      */
-    default void fromMap(Map<String, String> map) {
+    default void fromMap(Map<String, String> map) throws ModelNotFoundException {
         Field[] fields = getClass().getDeclaredFields();
         for (Field field : fields) {
             try {

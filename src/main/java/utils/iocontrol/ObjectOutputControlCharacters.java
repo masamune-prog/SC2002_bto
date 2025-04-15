@@ -8,10 +8,10 @@ public record ObjectOutputControlCharacters() {
     /**
      * The character to be used to separate the key and value of a map entry.
      */
-    public static final String DELIMITER_STRING = "\u001B\u001B\u001B";
+    public static final String DELIMITER_STRING = "|||";
 
     /**
      * The character to be used to separate features of an object.
      */
-    public static final String SEPARATOR_STRING = "\u001A\u001A\u001A";
+    public static final String SEPARATOR_STRING = ":::";
 }

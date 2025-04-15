@@ -27,9 +27,10 @@ public class OfficerLoadTest {
 
         // Force reload to ensure we're testing the latest data
         officerRepository.load();
-
+        //System.out.println("Officer data reloaded from CSV.");
         // Get all officers
         List<Officer> officers = officerRepository.getAll();
+        //System.out.println("Loaded officers: " + officers);
 
         // Debug: Print list size
         System.out.println("Number of officers loaded: " + (officers != null ? officers.size() : "null"));

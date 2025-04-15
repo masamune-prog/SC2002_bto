@@ -75,9 +75,9 @@ public class Officer implements User {
     @Override
     public void fromMap(Map<String, String> map) {
         this.officerID = map.getOrDefault("officerID", "");
-        this.nric = map.getOrDefault("NRIC", "");
+        this.nric = map.getOrDefault("nric", "");
         this.hashedPassword = map.getOrDefault("hashedPassword", "");
-        this.name = map.getOrDefault("Name", "");
+        this.name = map.getOrDefault("name", "");
         this.projectsInCharge = new ArrayList<>(); // Initialize empty list
         
         // Debug output

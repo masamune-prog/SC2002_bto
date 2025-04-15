@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import model.user.UserType;
+import utils.exception.ModelNotFoundException;
 
 public class Project implements Model, Displayable {
     //ProjectStatus status;
@@ -26,6 +28,9 @@ public class Project implements Model, Displayable {
     private Manager managerInCharge;
     private List<Officer> assignedOfficers;
     private int numOfficers;
+    private String managerID;
+    private List<String> officerIDs;
+    private ProjectStatus status;
 
     /**
      * Constructor for creating a new Project
@@ -48,13 +53,19 @@ public class Project implements Model, Displayable {
         this.managerInCharge = managerInCharge;
         this.assignedOfficers = new ArrayList<>();
         this.numOfficers = 0; // Maximum 10 slots
+        this.officerIDs = new ArrayList<>();
+        this.status = ProjectStatus.AVAILABLE;
     }
 
-    public Project(Map<String, String> map) {
-        fromMap(map);
+    public Project(Map<String, String> map) throws ModelNotFoundException {
+        try {
+            fromMap(map);
+        } catch (ModelNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void fromMap(Map<String, String> map) {
+    public void fromMap(Map<String, String> map) throws ModelNotFoundException {
         this.projectID = map.get("projectID");
         this.visibility = Boolean.parseBoolean(map.get("visibility"));
         this.projectName = map.get("projectName");
@@ -211,8 +222,9 @@ public class Project implements Model, Displayable {
         return false;
     }
 
-    public boolean assignOfficerByName(String officerName) {
-        Officer officer = OfficerRepository.getInstance().getOfficerByName(officerName);
+    public boolean assignOfficerByName(String officerName) throws ModelNotFoundException {
+        Officer officer = null;
+        officer = OfficerRepository.getInstance().getOfficerByName(officerName);
         if (officer != null) {
             return assignOfficer(officer);
         }
@@ -243,13 +255,58 @@ public class Project implements Model, Displayable {
     public void setNumOfficers(int numOfficers) {
         this.numOfficers = numOfficers;
     }
+
+    public String getProjectID() {
+        return projectID;
+    }
+
+    public String getManagerID() {
+        return managerID;
+    }
+
+    public List<String> getOfficerIDs() {
+        return officerIDs;
+    }
+
+    public ProjectStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProjectStatus status) {
+        this.status = status;
+    }
+
+    public void addOfficer(String officerID) throws ModelNotFoundException {
+        if (officerID == null || officerID.isEmpty()) {
+            throw new ModelNotFoundException("Invalid officer ID");
+        }
+        if (!officerIDs.contains(officerID)) {
+            officerIDs.add(officerID);
+        }
+    }
+
+    public void removeOfficer(String officerID) throws ModelNotFoundException {
+        if (officerID == null || officerID.isEmpty()) {
+            throw new ModelNotFoundException("Invalid officer ID");
+        }
+        if (!officerIDs.remove(officerID)) {
+            throw new ModelNotFoundException("Officer not found in project");
+        }
+    }
+
+    public boolean hasOfficer(String officerID) {
+        return officerIDs.contains(officerID);
+    }
+
     @Override
     public String getID() {
         return projectID;
     }
+
     private String getProjectInformationString() {
         return "| Project Status              | %-39s |\n";
     }
+
     private String getSingleProjectString() {
         StringBuilder display = new StringBuilder();
 
@@ -261,6 +318,7 @@ public class Project implements Model, Displayable {
 
         return display.toString();
     }
+
     @Override
     public String getDisplayableString() {
         StringBuilder display = new StringBuilder(getSingleProjectString());
@@ -307,6 +365,4 @@ public class Project implements Model, Displayable {
     public String getSplitter() {
         return "\n\n";
     }
-
-
 }

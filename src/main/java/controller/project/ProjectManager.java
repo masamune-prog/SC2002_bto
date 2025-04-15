@@ -1,15 +1,18 @@
 package controller.project;
 
 import model.project.Project;
+import model.project.ProjectStatus;
 import model.user.Applicant;
 import model.user.Manager;
 import model.user.Officer;
 import repository.project.ProjectRepository;
 import repository.user.ManagerRepository;
+import repository.user.OfficerRepository;
 import model.user.MaritalStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import utils.exception.ModelNotFoundException;
 
 /**
  * Manages project creation and modification operations
@@ -17,6 +20,7 @@ import java.util.List;
 public class ProjectManager {
     private final ProjectRepository projectRepository;
     private final ManagerRepository managerRepository;
+    private final OfficerRepository officerRepository;
 
     /**
      * Constructs a ProjectManager with default repositories
@@ -24,6 +28,7 @@ public class ProjectManager {
     public ProjectManager() {
         this.projectRepository = ProjectRepository.getInstance();
         this.managerRepository = ManagerRepository.getInstance();
+        this.officerRepository = OfficerRepository.getInstance();
     }
     public static void loadProjectsFromCSV() {
         ProjectRepository projectRepository = ProjectRepository.getInstance();
@@ -221,5 +226,61 @@ public class ProjectManager {
             }
         }
         return availableProjects;
+    }
+
+    public List<Project> getProjectsByOfficer(String officerID) {
+        List<Project> projects = new ArrayList<>();
+        for (Project project : projectRepository.getAll()) {
+            if (project.hasOfficer(officerID)) {
+                projects.add(project);
+            }
+        }
+        return projects;
+    }
+
+    public List<Project> getAvailableProjects() {
+        List<Project> availableProjects = new ArrayList<>();
+        for (Project project : projectRepository.getAll()) {
+            if (project.getStatus() == ProjectStatus.AVAILABLE) {
+                availableProjects.add(project);
+            }
+        }
+        return availableProjects;
+    }
+
+    public void addOfficerToProject(String projectID, String officerID) throws ModelNotFoundException {
+        Project project = projectRepository.getByID(projectID);
+        if (project == null) {
+            throw new ModelNotFoundException("Project not found");
+        }
+
+        Officer officer = officerRepository.getByID(officerID);
+        if (officer == null) {
+            throw new ModelNotFoundException("Officer not found");
+        }
+
+        project.addOfficer(officerID);
+        projectRepository.update(project);
+
+        officer.getProjectsInCharge().add(projectID);
+        officerRepository.update(officer);
+    }
+
+    public void removeOfficerFromProject(String projectID, String officerID) throws ModelNotFoundException {
+        Project project = projectRepository.getByID(projectID);
+        if (project == null) {
+            throw new ModelNotFoundException("Project not found");
+        }
+
+        Officer officer = officerRepository.getByID(officerID);
+        if (officer == null) {
+            throw new ModelNotFoundException("Officer not found");
+        }
+
+        project.removeOfficer(officerID);
+        projectRepository.update(project);
+
+        officer.getProjectsInCharge().remove(projectID);
+        officerRepository.update(officer);
     }
 }

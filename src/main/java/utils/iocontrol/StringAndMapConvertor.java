@@ -23,11 +23,11 @@ public class StringAndMapConvertor {
         Map<String, String> map = new HashMap<>();
         
         // Debug output
-        System.out.println("Parsing string: " + string);
+        //System.out.println("Parsing string: " + string);
         
         // Split by separator first, escaping the separator for regex
         String[] pairs = string.split(Pattern.quote(SEPARATOR_STRING));
-        System.out.println("Split into pairs: " + Arrays.toString(pairs));
+        //System.out.println("Split into pairs: " + Arrays.toString(pairs));
         
         for (String pair : pairs) {
             // Skip empty pairs
@@ -37,7 +37,7 @@ public class StringAndMapConvertor {
             
             // Split by delimiter, escaping the delimiter for regex
             String[] keyValue = pair.split(Pattern.quote(DELIMITER_STRING));
-            System.out.println("Split pair into key-value: " + Arrays.toString(keyValue));
+           // System.out.println("Split pair into key-value: " + Arrays.toString(keyValue));
             
             if (keyValue.length != 2) {
                 System.err.println("Warning: Invalid key-value pair format: " + pair);
@@ -48,7 +48,7 @@ public class StringAndMapConvertor {
             String value = keyValue[1].trim();
             
             // Debug output
-            System.out.println("Adding to map - Key: '" + key + "', Value: '" + value + "'");
+            //System.out.println("Adding to map - Key: '" + key + "', Value: '" + value + "'");
             
             map.put(key, value);
         }

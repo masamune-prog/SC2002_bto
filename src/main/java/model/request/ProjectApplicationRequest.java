@@ -1,5 +1,6 @@
 package model.request;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProjectApplicationRequest implements Request {
@@ -14,7 +15,7 @@ public class ProjectApplicationRequest implements Request {
                                      String managerID, String applicantID, RoomType roomType) {
         this.requestID = requestID;
         this.projectID = projectID;
-        this.status = status;
+        this.status = status != null ? status : RequestStatus.PENDING;
         this.managerID = managerID;
         this.applicantID = applicantID;
         this.roomType = roomType;
@@ -79,22 +80,33 @@ public class ProjectApplicationRequest implements Request {
     public void fromMap(Map<String, String> map) {
         this.requestID = map.get("requestID");
         this.projectID = map.get("projectID");
-        this.status = RequestStatus.valueOf(map.get("status"));
+        this.status = map.get("status") != null ? 
+                RequestStatus.valueOf(map.get("status")) : RequestStatus.PENDING;
         this.managerID = map.get("managerID");
         this.applicantID = map.get("applicantID");
-        this.roomType = RoomType.valueOf(map.get("roomType"));
+        
+        if (map.get("roomType") != null) {
+            try {
+                this.roomType = RoomType.valueOf(map.get("roomType"));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Error parsing room type: " + map.get("roomType"));
+                this.roomType = null;
+            }
+        } else {
+            this.roomType = null;
+        }
     }
 
     @Override
     public Map<String, String> toMap() {
-        Map<String, String> map = Map.of(
-                "requestID", requestID,
-                "projectID", projectID,
-                "status", status.toString(),
-                "managerID", managerID,
-                "applicantID", applicantID,
-                "roomType", roomType.toString()
-        );
+        Map<String, String> map = new HashMap<>();
+        map.put("requestID", requestID);
+        map.put("projectID", projectID);
+        map.put("status", status != null ? status.toString() : null);
+        map.put("managerID", managerID);
+        map.put("applicantID", applicantID);
+        map.put("roomType", roomType != null ? roomType.toString() : null);
+        map.put("requestType", getRequestType().toString());
         return map;
     }
 }

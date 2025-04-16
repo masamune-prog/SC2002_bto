@@ -2,6 +2,7 @@ package model.user;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import model.project.Project;
 public class Officer implements User {
@@ -80,11 +81,30 @@ public class Officer implements User {
         this.name = map.getOrDefault("name", "");
         this.projectsInCharge = new ArrayList<>(); // Initialize empty list
         
+        // Load projects in charge from CSV
+        String projectsInChargeStr = map.get("projectsInCharge");
+        if (projectsInChargeStr != null && !projectsInChargeStr.isEmpty()) {
+            // Skip processing if it's just the empty array string representation
+            if (projectsInChargeStr.equals("[]")) {
+                System.out.println("Skipping empty projects array notation for officer: " + this.name);
+            } else {
+                String[] projectIDs = projectsInChargeStr.split(",");
+                for (String projectID : projectIDs) {
+                    String trimmedID = projectID.trim();
+                    // Skip empty strings and the "[]" placeholder
+                    if (!trimmedID.isEmpty() && !trimmedID.equals("[]")) {
+                        this.projectsInCharge.add(trimmedID);
+                    }
+                }
+            }
+        }
+        
         // Debug output
         System.out.println("Creating officer from map: " + 
                          "ID=" + this.officerID + 
                          ", Name=" + this.name + 
-                         ", NRIC=" + this.nric);
+                         ", NRIC=" + this.nric + 
+                         ", Projects=" + this.projectsInCharge);
         
         // Validate required fields
         if (this.officerID.isEmpty() || this.nric.isEmpty() || this.name.isEmpty()) {
@@ -99,5 +119,57 @@ public class Officer implements User {
 
     public void setProjectsInCharge(List<String> projectsInCharge) {
         this.projectsInCharge = projectsInCharge;
+    }
+
+    /**
+     * Adds a project to the officer's list of projects in charge
+     * @param projectID the ID of the project to add
+     * @return true if the project was added, false if it was already in the list
+     */
+    public boolean addProject(String projectID) {
+        if (projectID == null || projectID.isEmpty()) {
+            return false;
+        }
+        
+        if (this.projectsInCharge == null) {
+            this.projectsInCharge = new ArrayList<>();
+        }
+        
+        // Check if the project is already in the list
+        if (!this.projectsInCharge.contains(projectID)) {
+            this.projectsInCharge.add(projectID);
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Removes a project from the officer's list of projects in charge
+     * @param projectID the ID of the project to remove
+     * @return true if the project was removed, false if it wasn't in the list
+     */
+    public boolean removeProject(String projectID) {
+        if (projectID == null || projectID.isEmpty() || this.projectsInCharge == null) {
+            return false;
+        }
+        
+        return this.projectsInCharge.remove(projectID);
+    }
+
+    @Override
+    public Map<String, String> toMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("officerID", this.officerID);
+        map.put("nric", this.nric);
+        map.put("hashedPassword", this.hashedPassword);
+        map.put("name", this.name);
+        
+        // Save projects in charge as a comma-separated list
+        if (this.projectsInCharge != null && !this.projectsInCharge.isEmpty()) {
+            map.put("projectsInCharge", String.join(",", this.projectsInCharge));
+        }
+        
+        return map;
     }
 }

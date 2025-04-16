@@ -1,5 +1,6 @@
 package controller.request;
 
+import controller.project.ProjectManager; // Added import
 import model.project.Project;
 import model.request.*;
 import model.user.Applicant;
@@ -10,18 +11,21 @@ import repository.user.ApplicantRepository;
 import utils.exception.ModelNotFoundException;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Manages applicant-related operations for project applications and registrations
  */
 public class ApplicantManager {
     private final RequestManager requestManager;
+    private final ProjectManager projectManager; // Added ProjectManager field
 
     /**
      * Constructor for ApplicantManager
      */
     public ApplicantManager() {
         this.requestManager = new RequestManager();
+        this.projectManager = new ProjectManager(); // Initialize ProjectManager
     }
 
     /**
@@ -37,7 +41,7 @@ public class ApplicantManager {
             throws ModelNotFoundException {
         // Validate entities
         Applicant applicant = ApplicantRepository.getInstance().getByID(applicantID);
-        Project project = ProjectRepository.getInstance().getByID(projectID);
+        Project project = projectManager.getProjectByID(projectID); // Use ProjectManager
 
         // Check if applicant is already registered
         if (applicant.getStatus() == ApplicantStatus.REGISTERED ||
@@ -55,16 +59,27 @@ public class ApplicantManager {
 
         // Create request
         String requestID = requestManager.getNewRequestID();
+        String managerID = project.getManagerInCharge() != null ? project.getManagerInCharge().getID() : null;
+        
+        // Debug output to help diagnose manager ID issues
+        System.out.println("DEBUG: Creating new application request");
+        System.out.println("DEBUG: Project ID: " + projectID);
+        System.out.println("DEBUG: Project Manager: " + (project.getManagerInCharge() != null ? 
+                          project.getManagerInCharge().getName() : "null"));
+        System.out.println("DEBUG: Manager ID being assigned: " + managerID);
+        
         ProjectApplicationRequest request = new ProjectApplicationRequest(
                 requestID,
                 projectID,
                 RequestStatus.PENDING,
-                project.getManagerInCharge().getID(),
+                managerID,
                 applicantID,
                 roomType
         );
 
         RequestRepository.getInstance().add(request);
+        applicant.setStatus(ApplicantStatus.PENDING);
+        ApplicantRepository.getInstance().update(applicant); // Update applicant status in repository
         return requestID;
     }
 
@@ -85,8 +100,8 @@ public class ApplicantManager {
             throw new IllegalStateException("Applicant is not registered for any project");
         }
 
-        // Find project by name
-        Project project = findProjectByName(applicant.getProject());
+        // Find project by name using ProjectManager
+        Project project = projectManager.getProjectByName(applicant.getProject()); // Use ProjectManager
         if (project == null) {
             throw new ModelNotFoundException("Project not found for this applicant");
         }
@@ -124,11 +139,14 @@ public class ApplicantManager {
      * Creates a project booking request
      *
      * @param applicantID the ID of the applicant
+     * @param originalRequestID the ID of the original application request
+     * @param officerIDs List of officer IDs assigned to the project
+     * @param roomType the type of room requested
      * @return the ID of the created request
-     * @throws ModelNotFoundException if the applicant is not found
+     * @throws ModelNotFoundException if the applicant or project is not found
      */
     public String createProjectBooking(String applicantID, String originalRequestID,
-                                       String officerID, String roomType)
+                                       List<String> officerIDs, String roomType)
             throws ModelNotFoundException {
         Applicant applicant = ApplicantRepository.getInstance().getByID(applicantID);
         LocalDate bookingDate = LocalDate.now();
@@ -136,7 +154,7 @@ public class ApplicantManager {
             throw new IllegalStateException("Applicant must be registered before booking");
         }
 
-        Project project = findProjectByName(applicant.getProject());
+        Project project = projectManager.getProjectByName(applicant.getProject()); // Use ProjectManager
         if (project == null) {
             throw new ModelNotFoundException("Project not found for this applicant");
         }
@@ -148,7 +166,7 @@ public class ApplicantManager {
                 project.getID(),
                 RequestStatus.PENDING,
                 project.getManagerInCharge().getID(),
-                officerID,
+                officerIDs, // Pass the list of officer IDs
                 applicantID,
                 originalRequestID,
                 roomType,
@@ -166,11 +184,6 @@ public class ApplicantManager {
      * @return the project, or null if not found
      */
     private Project findProjectByName(String projectName) {
-        for (Project project : ProjectRepository.getInstance().getAll()) {
-            if (project.getProjectName().equals(projectName)) {
-                return project;
-            }
-        }
-        return null;
+         return projectManager.getProjectByName(projectName); // Use ProjectManager
     }
 }

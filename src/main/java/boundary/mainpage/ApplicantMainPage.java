@@ -2,18 +2,17 @@ package boundary.mainpage;
 
 import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
-import boundary.account.ViewApplicantProfile;
 import boundary.modelviewer.ModelViewer;
 import boundary.modelviewer.ProjectViewer;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 import controller.request.ApplicantManager;
+import controller.request.RequestManager;
 import model.project.Project;
+import model.request.ProjectApplicationRequest;
+import model.request.Request;
 import model.request.RoomType;
-import model.user.Applicant;
-import model.user.ApplicantStatus;
-import model.user.User;
-import model.user.UserType;
+import model.user.*;
 import repository.project.ProjectRepository;
 import repository.user.ApplicantRepository;
 import repository.enquiry.EnquiryRepository;
@@ -60,9 +59,11 @@ public class ApplicantMainPage {
                 System.out.println();
                 System.out.println("\t1. View my profile");
                 System.out.println("\t2. Change my password");
+                //Option 3 does not work
                 System.out.println("\t3. View available projects");
                 System.out.println("\t4. View my application status");
                 System.out.println("\t5. Apply for a project");
+                //Withdraw application is broken
                 System.out.println("\t6. Withdraw application");
                 System.out.println("\t7. Book a flat");
                 System.out.println("\t8. Submit enquiry");
@@ -92,7 +93,7 @@ public class ApplicantMainPage {
                 Applicant refreshedApplicant = ApplicantRepository.getInstance().getByID(applicant.getID());
 
                 switch (choice) {
-                    case 1 -> ViewApplicantProfile.viewApplicantProfile(refreshedApplicant);
+                    case 1 -> displayApplicantProfile(refreshedApplicant);
                     case 2 -> ChangeAccountPassword.changePassword(UserType.APPLICANT, refreshedApplicant.getNric());
                     case 3 -> ProjectViewer.viewAvailableProjectList(refreshedApplicant);
                     case 4 -> viewApplicationStatus(refreshedApplicant);
@@ -138,14 +139,51 @@ public class ApplicantMainPage {
             }
         }
     }
-
-    private void viewApplicationStatus(Applicant applicant) throws PageBackException {
+    private void displayApplicantProfile(Applicant applicant) throws PageBackException {
+        ChangePage.changePage();
+        //get all attributes of the applicant
+        System.out.println("Applicant Profile");
+        System.out.println("-----------------");
+        System.out.println("Name: " + applicant.getName());
+        System.out.println("NRIC: " + applicant.getNric());
+        System.out.println("Project: " + applicant.getProject());
+        System.out.println("Status: " + applicant.getStatus());
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        throw new PageBackException();
+    }
+    private void viewApplicationStatus(Applicant applicant) throws PageBackException, ModelNotFoundException {
         ChangePage.changePage();
         System.out.println("Your current application status: " + applicant.getStatus());
         if (applicant.getStatus() != ApplicantStatus.UNREGISTERED) {
-            System.out.println("Project: " + projectManager.getAvailableProjects(applicant));
+            // Show the request status
+            System.out.println("Your current project: " + applicant.getProject());
+
+            // Initialize RequestManager
+            RequestManager requestManager = new RequestManager();
+
+            // Show the Request tied to User with the Type ProjectApplication
+            Request applicantRequest = requestManager.getProjectApplicationRequestByApplicantID(applicant.getID());
+
+            if (applicantRequest != null) {
+                System.out.println("\nApplication Details:");
+                System.out.println("------------------");
+                System.out.println("Request ID: " + applicantRequest.getID());
+                System.out.println("Status: " + applicantRequest.getStatus());
+                System.out.println("Project ID: " + applicantRequest.getProjectID());
+                System.out.println("Project Name: " + ProjectRepository.getInstance().getByID(applicantRequest.getProjectID()).getProjectName());
+
+
+
+                if (applicantRequest instanceof ProjectApplicationRequest) {
+                    ProjectApplicationRequest appRequest = (ProjectApplicationRequest) applicantRequest;
+                    System.out.println("Room Type: " + appRequest.getRoomType());
+                }
+            } else {
+                System.out.println("No application request found.");
+            }
         }
-        System.out.println("Press Enter to go back.");
+        System.out.println("\nPress Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();
     }
@@ -160,16 +198,26 @@ public class ApplicantMainPage {
         }
         System.out.println("Available Projects:");
         ModelViewer.displayListOfDisplayable(projectManager.getAvailableProjects(applicant));
+        //if no projects available
+        if (projectManager.getAvailableProjects(applicant).isEmpty()) {
+            System.out.println("No available projects. Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
         System.out.print("Enter project ID: ");
         String projectID = scanner.nextLine();
-        if (!ProjectRepository.getInstance().contains(projectID)) {
+        Project selectedProject = null;
+        try {
+            selectedProject = projectManager.getProjectByID(projectID); // Use ProjectManager
+            if (selectedProject == null) throw new ModelNotFoundException("Project not found.");
+        } catch (ModelNotFoundException e) {
             System.out.println("Project not found. Press Enter to go back.");
             scanner.nextLine();
             throw new PageBackException();
         }
-        Project selectedProject = ProjectRepository.getInstance().getByID(projectID);
         System.out.println("Selected project:");
         ModelViewer.displaySingleDisplayable(selectedProject);
+        //TODO add error handling when user is not allowed to apply for the room type
         System.out.println("Select room type:");
         System.out.println("1. Two-room flat");
         System.out.println("2. Three-room flat");
@@ -242,37 +290,72 @@ public class ApplicantMainPage {
             scanner.nextLine();
             throw new PageBackException();
         }
-        System.out.println("You are currently registered for: " + applicant.getProject());
-        System.out.println("Select room type for booking:");
-        System.out.println("1. Two-room flat");
-        System.out.println("2. Three-room flat");
-        int roomChoice = IntGetter.readInt();
-        String roomType;
-        if (roomChoice == 1) {
-            roomType = "TWO_ROOM_FLAT";
-        } else if (roomChoice == 2) {
-            roomType = "THREE_ROOM_FLAT";
-        } else {
-            System.out.println("Invalid choice. Press Enter to go back.");
+        
+        // Initialize RequestManager
+        RequestManager requestManager = new RequestManager();
+        
+        // Get the original application request
+        Request applicationRequest = requestManager.getProjectApplicationRequestByApplicantID(applicant.getID());
+        
+        if (applicationRequest == null) {
+            System.out.println("Error: Could not find your original application request.");
+            System.out.println("Press Enter to go back.");
             scanner.nextLine();
             throw new PageBackException();
         }
-        System.out.print("Confirm booking? (Y/N): ");
+        
+        // Extract the room type from the original application if it's a ProjectApplicationRequest
+        String roomType = null;
+        String originalRequestID = "N/A";
+        
+        if (applicationRequest instanceof ProjectApplicationRequest) {
+            ProjectApplicationRequest appRequest = (ProjectApplicationRequest) applicationRequest;
+            roomType = appRequest.getRoomType().toString();
+            originalRequestID = appRequest.getID();
+            System.out.println("Room type from your original application: " + roomType.replace("_", " ").toLowerCase());
+        } else {
+            System.out.println("Error: Could not determine room type from original application.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+        
+        System.out.println("You are currently registered for: " + applicant.getProject());
+        System.out.print("Confirm booking for a " + roomType.replace("_", " ").toLowerCase() + "? (Y/N): ");
         String confirm = scanner.nextLine().toUpperCase();
+        
         if (confirm.equals("Y")) {
             try {
+                // Find assigned officers
+                Project project = projectManager.getProjectByName(applicant.getProject()); // Use ProjectManager
+                List<String> officerIDs = new java.util.ArrayList<>(); // Initialize empty list
+                
+                if (project != null && project.getAssignedOfficers() != null && !project.getAssignedOfficers().isEmpty()) {
+                    // Get IDs from all assigned officers
+                    for (Officer officer : project.getAssignedOfficers()) {
+                        officerIDs.add(officer.getID());
+                    }
+                } else {
+                    // Handle case with no officers if necessary, e.g., add a default or leave empty
+                    // For now, we'll pass an empty list if no officers are assigned.
+                }
+                
+                // Assuming createProjectBooking now takes List<String> officerIDs
                 String requestID = applicantManager.createProjectBooking(
                         applicant.getID(),
-                        "N/A",  // Original request ID
-                        "SYSTEM",  // Officer ID
+                        originalRequestID,  // Use the original application request ID
+                        officerIDs,         // Pass the list of officer IDs
                         roomType);
+                        
                 System.out.println("Booking request submitted successfully. Request ID: " + requestID);
+                System.out.println("Your booking is linked to your original application: " + originalRequestID);
             } catch (IllegalStateException e) {
                 System.out.println("Error: " + e.getMessage());
             }
         } else {
             System.out.println("Booking cancelled.");
         }
+        
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
         throw new PageBackException();

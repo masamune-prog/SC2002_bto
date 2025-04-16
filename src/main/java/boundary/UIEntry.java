@@ -8,6 +8,7 @@ import repository.request.RequestRepository;
 import repository.user.ManagerRepository;
 import repository.user.OfficerRepository;
 import repository.user.ApplicantRepository;
+import repository.enquiry.EnquiryRepository; // Added import
 import utils.config.Location;
 
 import java.io.File;
@@ -39,6 +40,51 @@ public class UIEntry {
     }
 
     /**
+     * Loads data from repositories.
+     */
+    private static void loadData() {
+        System.out.println("Loading data...");
+        // Load users first
+        ApplicantRepository applicantRepository = ApplicantRepository.getInstance();
+        ManagerRepository managerRepository = ManagerRepository.getInstance();
+        OfficerRepository officerRepository = OfficerRepository.getInstance();
+        try {
+            applicantRepository.load();
+            managerRepository.load();
+            officerRepository.load();
+            System.out.println("Users loaded successfully.");
+        } catch (Exception e) {
+            System.err.println("Error loading user data: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Load projects using ProjectManager
+        ProjectManager.loadProjectsFromCSV(); // Use ProjectManager static method
+
+        // Load requests
+        RequestRepository requestRepository = RequestRepository.getInstance();
+        try {
+            requestRepository.load();
+            System.out.println("Requests loaded successfully.");
+        } catch (Exception e) {
+            System.err.println("Error loading request data: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Load enquiries
+        EnquiryRepository enquiryRepository = EnquiryRepository.getInstance();
+        try {
+            enquiryRepository.load();
+            System.out.println("Enquiries loaded successfully.");
+        } catch (Exception e) {
+            System.err.println("Error loading enquiry data: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        System.out.println("Data loading complete.");
+    }
+
+    /**
      * Starts the application.
      */
     public static void start() {
@@ -50,13 +96,6 @@ public class UIEntry {
             System.out.println("Directory created: " + created);
         }
 
-        // Initialize repositories
-        ApplicantRepository applicantRepository = ApplicantRepository.getInstance();
-        ManagerRepository managerRepository = ManagerRepository.getInstance();
-        OfficerRepository officerRepository = OfficerRepository.getInstance();
-        ProjectRepository projectRepository = ProjectRepository.getInstance();
-        RequestRepository requestRepository = RequestRepository.getInstance();
-
         // Check if it's first start
         if (firstStart()) {
             System.out.println("First startup detected. Loading initial data...");
@@ -67,11 +106,7 @@ public class UIEntry {
         } else {
             System.out.println("Loading existing data...");
             try {
-                // Load user data first
-                AccountManager.loadAllUsersFromCSV();
-                // Then load project data
-                ProjectManager.loadProjectsFromCSV();
-                System.out.println("Data loading complete.");
+                loadData();
             } catch (Exception e) {
                 System.err.println("Error loading data: " + e.getMessage());
                 e.printStackTrace();

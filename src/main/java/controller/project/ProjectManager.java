@@ -9,10 +9,12 @@ import repository.project.ProjectRepository;
 import repository.user.ManagerRepository;
 import repository.user.OfficerRepository;
 import model.user.MaritalStatus;
+import utils.exception.ModelNotFoundException;
+import utils.exception.ModelAlreadyExistsException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import utils.exception.ModelNotFoundException;
+import java.util.function.Predicate;
 
 /**
  * Manages project creation and modification operations
@@ -69,10 +71,11 @@ public class ProjectManager {
                 twoRoomFlatsPrice, threeRoomFlatsPrice,
                 applicationOpeningDate, applicationClosingDate, managerInCharge);
 
-
-
-        // Add to repository
-        projectRepository.getAll().add(project);
+        try {
+            projectRepository.add(project);
+        } catch (ModelAlreadyExistsException e) {
+            throw new IllegalStateException("Generated project ID already exists: " + projectID, e);
+        }
 
         return project;
     }
@@ -282,5 +285,63 @@ public class ProjectManager {
 
         officer.getProjectsInCharge().remove(projectID);
         officerRepository.update(officer);
+    }
+
+    /**
+     * Gets all projects.
+     */
+    public List<Project> getAllProjects() {
+        return projectRepository.getAll();
+    }
+
+    /**
+     * Gets projects managed by a specific manager ID.
+     */
+    public List<Project> getProjectsByManagerID(String managerID) {
+        //loop through all projects and find the ones with the same manager ID
+        List<Project> projects = new ArrayList<>();
+        for (Project project : projectRepository.getAll()) {
+            if (project.getManagerInCharge().getID().equals(managerID)) {
+                projects.add(project);
+            }
+        }
+        return projects;
+    }
+
+    /**
+     * Updates an existing project in the repository.
+     */
+    public void updateProject(Project project) throws ModelNotFoundException {
+        projectRepository.update(project);
+    }
+
+    /**
+     * Deletes a project by its ID.
+     */
+    public void deleteProject(String projectID) throws ModelNotFoundException {
+        //Project project = projectRepository.getByID(projectID);
+        projectRepository.remove(projectID);
+    }
+
+    /**
+     * Finds projects based on a set of rules (predicates).
+     */
+    public List<Project> findProjectsByRules(Predicate<Project>... rules) {
+        return projectRepository.findByRules(rules);
+    }
+
+    /**
+     * Adds a project to the repository. 
+     * Generally, createProject should be used, but this allows adding pre-constructed objects if needed.
+     */
+    public void addProject(Project project) throws ModelAlreadyExistsException {
+        projectRepository.add(project);
+    }
+
+    /**
+     * Gets a project by its ID.
+     */
+    public Project getProjectByID(String projectID) throws ModelNotFoundException {
+        return projectRepository.getByID(projectID);
     }
 }

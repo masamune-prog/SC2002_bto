@@ -1,33 +1,35 @@
 package controller.request;
 
+import controller.project.ProjectManager; // Added import
 import model.project.Project;
 import model.request.ProjectApplicationRequest;
 import model.request.ProjectBookingRequest;
+import model.request.ProjectDeregistrationRequest; // Added import
 import model.request.Request;
 import model.request.RequestStatus;
 import model.user.Manager;
 import model.user.Officer;
-import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
 import utils.exception.ModelAlreadyExistsException;
 import utils.exception.ModelNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * Manages all operations that can be performed by a Manager
  */
 public class ManagerManager {
-    private final ProjectRepository projectRepository;
+    private final ProjectManager projectManager; // Changed from ProjectRepository
     private final RequestRepository requestRepository;
 
     /**
      * Constructs a ManagerManager with default repositories
      */
     public ManagerManager() {
-        this.projectRepository = ProjectRepository.getInstance();
+        this.projectManager = new ProjectManager(); // Changed initialization
         this.requestRepository = RequestRepository.getInstance();
     }
 
@@ -35,7 +37,7 @@ public class ManagerManager {
      * Creates a new project with the given details
      */
     public Project createProject(String projectID, String projectName, Manager manager,
-                                 boolean visibility, String neighborhood, Integer twoRoomFlatsAvailable, Integer threeRoomFlatsAvailable,Double twoRoomFlatsPrice,Double threeRoomFlatsPrice, LocalDate applicationOpeningDate, LocalDate applicationClosingDate,Manager managerInCharge) {
+                                 boolean visibility, String neighborhood, Integer twoRoomFlatsAvailable, Integer threeRoomFlatsAvailable, Double twoRoomFlatsPrice, Double threeRoomFlatsPrice, LocalDate applicationOpeningDate, LocalDate applicationClosingDate, Manager managerInCharge) {
         validateProjectData(projectName, manager);
         Project project = new Project(projectID, visibility, projectName,
                 neighborhood, twoRoomFlatsAvailable, threeRoomFlatsAvailable,
@@ -43,7 +45,7 @@ public class ManagerManager {
                 applicationOpeningDate, applicationClosingDate, managerInCharge);
 
         try {
-            projectRepository.add(project);
+            projectManager.addProject(project); // Use ProjectManager to add
         } catch (ModelAlreadyExistsException e) {
             throw new IllegalArgumentException("Project with ID " + projectID + " already exists");
         }
@@ -54,7 +56,7 @@ public class ManagerManager {
      * Gets all projects managed by a specific manager
      */
     public List<Project> getManagerProjects(Manager manager) {
-        return projectRepository.findByRules(
+        return projectManager.findProjectsByRules(
                 project -> project.getManagerInCharge().getID().equals(manager.getID())
         );
     }
@@ -74,7 +76,7 @@ public class ManagerManager {
         boolean result = project.assignOfficer(officer);
         if (result) {
             try {
-                projectRepository.update(project);
+                projectManager.updateProject(project); // Use ProjectManager to update
             } catch (ModelNotFoundException e) {
                 return false;
             }
@@ -93,7 +95,7 @@ public class ManagerManager {
         boolean result = project.removeOfficer(officer);
         if (result) {
             try {
-                projectRepository.update(project);
+                projectManager.updateProject(project); // Use ProjectManager to update
             } catch (ModelNotFoundException e) {
                 return false;
             }
@@ -111,7 +113,7 @@ public class ManagerManager {
 
         project.setVisibility(visibility);
         try {
-            projectRepository.update(project);
+            projectManager.updateProject(project); // Use ProjectManager to update
             return true;
         } catch (ModelNotFoundException e) {
             return false;
@@ -135,7 +137,7 @@ public class ManagerManager {
         }
 
         try {
-            projectRepository.update(project);
+            projectManager.updateProject(project); // Use ProjectManager to update
             return true;
         } catch (ModelNotFoundException e) {
             return false;
@@ -155,7 +157,7 @@ public class ManagerManager {
         project.setThreeRoomFlatsAvailable(threeRoomFlats);
 
         try {
-            projectRepository.update(project);
+            projectManager.updateProject(project); // Use ProjectManager to update
             return true;
         } catch (ModelNotFoundException e) {
             return false;
@@ -166,11 +168,18 @@ public class ManagerManager {
      * Gets all project application requests pending manager review
      */
     public List<ProjectApplicationRequest> getPendingApplicationRequests(Manager manager) {
-        return requestRepository.findByRules(
-                        request -> request.getManagerID().equals(manager.getID()),
-                        request -> request.getStatus() == RequestStatus.PENDING,
-                        request -> request instanceof ProjectApplicationRequest
-                ).stream()
+        // Define the predicates separately to avoid ambiguity
+        Predicate<Request> managerPredicate = request ->
+                request.getManagerID() != null && request.getManagerID().equals(manager.getID());
+        Predicate<Request> statusPredicate = request ->
+                request.getStatus() == RequestStatus.PENDING;
+        Predicate<Request> typePredicate = request ->
+                request instanceof ProjectApplicationRequest;
+
+        List<Request> requests = requestRepository.findByRules(
+                managerPredicate, statusPredicate, typePredicate);
+
+        return requests.stream()
                 .map(request -> (ProjectApplicationRequest) request)
                 .collect(Collectors.toList());
     }
@@ -179,12 +188,39 @@ public class ManagerManager {
      * Gets all project booking requests pending manager review
      */
     public List<ProjectBookingRequest> getPendingBookingRequests(Manager manager) {
-        return requestRepository.findByRules(
-                        request -> request.getManagerID().equals(manager.getID()),
-                        request -> request.getStatus() == RequestStatus.PENDING,
-                        request -> request instanceof ProjectBookingRequest
-                ).stream()
+        // Define the predicates separately to avoid ambiguity
+        Predicate<Request> managerPredicate = request ->
+                request.getManagerID() != null && request.getManagerID().equals(manager.getID());
+        Predicate<Request> statusPredicate = request ->
+                request.getStatus() == RequestStatus.PENDING;
+        Predicate<Request> typePredicate = request ->
+                request instanceof ProjectBookingRequest;
+
+        List<Request> requests = requestRepository.findByRules(
+                managerPredicate, statusPredicate, typePredicate);
+
+        return requests.stream()
                 .map(request -> (ProjectBookingRequest) request)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets all project deregistration requests pending manager review
+     */
+    public List<ProjectDeregistrationRequest> getPendingDeregistrationRequests(Manager manager) {
+        // Define the predicates separately to avoid ambiguity
+        Predicate<Request> managerPredicate = request ->
+                request.getManagerID() != null && request.getManagerID().equals(manager.getID());
+        Predicate<Request> statusPredicate = request ->
+                request.getStatus() == RequestStatus.PENDING;
+        Predicate<Request> typePredicate = request ->
+                request instanceof ProjectDeregistrationRequest;
+
+        List<Request> requests = requestRepository.findByRules(
+                managerPredicate, statusPredicate, typePredicate);
+
+        return requests.stream()
+                .map(request -> (ProjectDeregistrationRequest) request)
                 .collect(Collectors.toList());
     }
 
@@ -192,7 +228,8 @@ public class ManagerManager {
      * Approves a pending request
      */
     public boolean approveRequest(Request request, Manager manager) {
-        if (request == null || !request.getManagerID().equals(manager.getID()) ||
+        if (request == null || request.getManagerID() == null ||
+                !request.getManagerID().equals(manager.getID()) ||
                 request.getStatus() != RequestStatus.PENDING) {
             return false;
         }
@@ -210,7 +247,8 @@ public class ManagerManager {
      * Rejects a pending request
      */
     public boolean rejectRequest(Request request, Manager manager) {
-        if (request == null || !request.getManagerID().equals(manager.getID()) ||
+        if (request == null || request.getManagerID() == null ||
+                !request.getManagerID().equals(manager.getID()) ||
                 request.getStatus() != RequestStatus.PENDING) {
             return false;
         }
@@ -228,7 +266,7 @@ public class ManagerManager {
      * Gets a specific project by ID
      */
     public Project getProjectByID(String projectID) throws ModelNotFoundException {
-        return projectRepository.getByID(projectID);
+        return projectManager.getProjectByID(projectID); // Use ProjectManager
     }
 
     /**
@@ -250,10 +288,8 @@ public class ManagerManager {
             throw new IllegalArgumentException("A manager must be assigned to the project");
         }
 
-        for (Project existingProject : projectRepository.getAll()) {
-            if (existingProject.getProjectName().equals(projectName)) {
-                throw new IllegalArgumentException("A project with this name already exists");
-            }
+        if (projectManager.getProjectByName(projectName) != null) { // Use ProjectManager
+            throw new IllegalArgumentException("A project with this name already exists");
         }
     }
 }

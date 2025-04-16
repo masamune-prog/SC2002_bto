@@ -5,7 +5,6 @@ import java.util.Map;
 
 import model.project.Project;
 import model.user.Officer;
-import repository.project.ProjectRepository;
 import repository.user.OfficerRepository;
 import utils.exception.ModelNotFoundException;
 
@@ -14,23 +13,24 @@ public class OfficerApplicationRequest implements Request {
     private RequestStatus status;
 
     // Object references
-    private Project project;
+    private Project project; // Keep project object if needed, but don't fetch it here.
     private Officer officer;
 
     // String identifiers for mapping
-    private String projectID;
+    private String projectID; // Ensure projectID is stored
     private String userName;
     private String nric;
 
     public OfficerApplicationRequest(String requestID, Project project, Officer officer) {
         this.requestID = requestID;
-        this.project = project;
+        this.project = project; // Store the passed project object
+        this.projectID = project != null ? project.getID() : null; // Store the ID
         this.officer = officer;
-        this.projectID = project != null ? project.getID() : null;
         this.userName = officer != null ? officer.getName() : null;
         this.nric = officer != null ? officer.getNric() : null;
         this.status = RequestStatus.PENDING;
     }
+
     public OfficerApplicationRequest(String requestID, String userName, String nric, String projectID, RequestStatus status) {
         this.requestID = requestID;
         this.userName = userName;
@@ -38,16 +38,9 @@ public class OfficerApplicationRequest implements Request {
         this.projectID = projectID;
         this.status = status != null ? status : RequestStatus.PENDING;
 
-        // Try to load the objects if possible
-        try {
-            if (projectID != null) {
-                this.project = ProjectRepository.getInstance().getByID(projectID);
-            }
-            if (nric != null) {
-                this.officer = OfficerRepository.getInstance().getByNRIC(nric);
-            }
-        } catch (ModelNotFoundException e) {
-            // Objects will remain null if not found
+        // Try to load the officer object if possible
+        if (nric != null) {
+            this.officer = OfficerRepository.getInstance().getByNRIC(nric);
         }
     }
 
@@ -76,6 +69,7 @@ public class OfficerApplicationRequest implements Request {
     public Officer getOfficer() {
         return officer;
     }
+
     public String getOfficerID() {
         return officer != null ? officer.getID() : null;
     }
@@ -122,21 +116,14 @@ public class OfficerApplicationRequest implements Request {
         this.requestID = map.get("requestID");
         this.userName = map.get("userName");
         this.nric = map.get("nric");
-        this.projectID = map.get("projectID");
+        this.projectID = map.get("projectID"); // Store projectID from map
         this.status = map.get("status") != null ?
                 RequestStatus.valueOf(map.get("status")) :
                 RequestStatus.PENDING;
 
-        // Try to load the objects if possible
-        try {
-            if (projectID != null) {
-                this.project = ProjectRepository.getInstance().getByID(projectID);
-            }
-            if (nric != null) {
-                this.officer = OfficerRepository.getInstance().getByNRIC(nric);
-            }
-        } catch (ModelNotFoundException e) {
-            // Objects will remain null if not found
+        // Try to load the officer object if possible
+        if (nric != null) {
+            this.officer = OfficerRepository.getInstance().getByNRIC(nric);
         }
     }
 
@@ -146,8 +133,9 @@ public class OfficerApplicationRequest implements Request {
         map.put("requestID", requestID);
         map.put("userName", userName);
         map.put("nric", nric);
-        map.put("projectID", projectID);
-        map.put("status", status.toString());
+        map.put("projectID", projectID); // Use stored projectID
+        map.put("status", status != null ? status.toString() : null);
+        map.put("requestType", getRequestType().toString());
         return map;
     }
 

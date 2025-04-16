@@ -1,24 +1,24 @@
 package controller.request;
 
+import controller.project.ProjectManager;
 import model.project.Project;
 import model.request.OfficerApplicationRequest;
 import model.request.RequestStatus;
 import model.user.Officer;
-import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
 import repository.user.OfficerRepository;
 import utils.exception.ModelNotFoundException;
 
 public class OfficerManager {
     private final RequestManager requestManager;
+    private final ProjectManager projectManager;
     private final RequestRepository requestRepository;
-    private final ProjectRepository projectRepository;
     private final OfficerRepository officerRepository;
 
     public OfficerManager() {
         this.requestManager = new RequestManager();
+        this.projectManager = new ProjectManager();
         this.requestRepository = RequestRepository.getInstance();
-        this.projectRepository = ProjectRepository.getInstance();
         this.officerRepository = OfficerRepository.getInstance();
     }
 
@@ -30,7 +30,7 @@ public class OfficerManager {
         }
 
         // Check if project exists
-        Project project = projectRepository.getByID(projectID);
+        Project project = projectManager.getProjectByID(projectID);
         if (project == null) {
             throw new ModelNotFoundException("Project not found");
         }
@@ -52,7 +52,7 @@ public class OfficerManager {
 
         // Get the officer and project
         Officer officer = officerRepository.getByID(request.getID());
-        Project project = projectRepository.getByID(request.getProjectID());
+        Project project = projectManager.getProjectByID(request.getProjectID());
 
         if (officer == null || project == null) {
             throw new ModelNotFoundException("Officer or Project not found");
@@ -60,7 +60,7 @@ public class OfficerManager {
 
         // Add officer to project
         project.addOfficer(officer.getID());
-        projectRepository.update(project);
+        projectManager.updateProject(project);
 
         // Add project to officer's list
         officer.getProjectsInCharge().add(project.getID());
@@ -80,4 +80,4 @@ public class OfficerManager {
         request.reject();
         requestRepository.update(request);
     }
-} 
+}

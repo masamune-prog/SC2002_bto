@@ -19,5 +19,9 @@ public enum ApplicantStatus {
     /**
      * the applicant never register for any project
      */
-    UNREGISTERED
+    UNREGISTERED,
+    /**
+     * the applicant has successfully booked a flat
+     */
+    BOOKED
 }

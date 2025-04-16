@@ -135,8 +135,9 @@ public class OfficerRepository extends Repository<Officer> {
                 rowMap.put("hashedPassword", hashedPassword);
             }
 
-            // Initialize projectsInCharge as empty list
-            rowMap.put("projectsInCharge", "[]");
+            // Initialize projectsInCharge as empty string instead of "[]"
+            // An empty string will be properly handled as no projects
+            rowMap.put("projectsInCharge", "");
 
             result.add(rowMap);
 

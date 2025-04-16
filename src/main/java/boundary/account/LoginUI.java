@@ -55,7 +55,6 @@ public class LoginUI {
             //print out the user passed into AccountManager
             switch (userType) {
                 case APPLICANT -> ApplicantMainPage.applicantMainPage(user);
-                //TODO Create the other 2 frontend
                 case MANAGER -> ManagerMainPage.managerMainPage(user);
                 case OFFICER -> OfficerMainPage.officerMainPage(user);
                 default -> throw new IllegalStateException("Unexpected user type: " + userType);

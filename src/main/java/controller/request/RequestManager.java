@@ -14,6 +14,8 @@ import repository.user.OfficerRepository;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -46,12 +48,27 @@ public class RequestManager {
         return "R" + (max + 1);
     }
 
-    /**
-     * Approves a request by updating its status
-     *
-     * @param requestID the request ID
-     * @throws ModelNotFoundException if the request is not found
-     */
+
+    public List<Request> getProjectApplicationRequests() {
+        List<Request> requests = new ArrayList<>();
+        for (Request request : RequestRepository.getInstance().getAll()) {
+            if (request.getRequestType() == RequestType.PROJECT_APPLICATION_REQUEST) {
+                requests.add(request);
+            }
+        }
+        return requests;
+    }
+    public Request getProjectApplicationRequestByApplicantID(String applicantID) {
+        for (Request request : RequestRepository.getInstance().getAll()) {
+            if (request.getRequestType() == RequestType.PROJECT_APPLICATION_REQUEST) {
+                ProjectApplicationRequest applicationRequest = (ProjectApplicationRequest) request;
+                if (applicationRequest.getApplicantID().equals(applicantID)) {
+                    return request;
+                }
+            }
+        }
+        return null;
+    }
     public void approveRequestForStatus(String requestID) throws ModelNotFoundException {
         Request request = RequestRepository.getInstance().getByID(requestID);
         request.setStatus(RequestStatus.APPROVED);
@@ -78,15 +95,30 @@ public class RequestManager {
      */
     private void approveOfficerRequest(Request request) {
         if (request instanceof OfficerApplicationRequest officerRequest) {
-            String projectID = officerRequest.getProjectID();
-            String officerID = officerRequest.getOfficerID();
-
             try {
-                Project project = ProjectRepository.getInstance().getByID(projectID);
-                Officer officer = OfficerRepository.getInstance().getByID(officerRequest.getOfficerID());
-                projectManager.assignOfficerToProject(project, officer);
+                // Get the officer and project
+                Officer officer = OfficerRepository.getInstance().getByNRIC(officerRequest.getNric());
+                Project project = projectManager.getProjectByID(officerRequest.getProjectID());
+
+                if (officer == null || project == null) {
+                    throw new ModelNotFoundException("Officer or Project not found");
+                }
+
+                // Add officer to project
+                project.addOfficer(officer.getID());
                 ProjectRepository.getInstance().update(project);
+
+                // Add project to officer's list of projects in charge using the new helper method
+                officer.addProject(project.getID());
+                OfficerRepository.getInstance().update(officer);
+
+                // Mark the request as approved
+                officerRequest.setStatus(RequestStatus.APPROVED);
+                RequestRepository.getInstance().update(officerRequest);
+                
+                System.out.println("Officer " + officer.getName() + " has been assigned to project " + project.getProjectName());
             } catch (ModelNotFoundException e) {
+                System.err.println("Error assigning officer to project: " + e.getMessage());
                 e.printStackTrace();
             }
         } else {
@@ -106,13 +138,12 @@ public class RequestManager {
             Applicant applicant = ApplicantRepository.getInstance().getByID(applicationRequest.getApplicantID());
 
             try {
-                Project project = ProjectRepository.getInstance().getByID(projectID);
+                Project project = projectManager.getProjectByID(projectID);
 
                 // Update applicant status and project information
                 applicant.setStatus(ApplicantStatus.REGISTERED);
                 applicant.setProject(project.getProjectName());
 
-                // Update flat availability based on selected room type
                 // Update flat availability based on selected room type
                 if (applicationRequest.getRoomType() == RoomType.TWO_ROOM_FLAT) {
                     project.setTwoRoomFlatsAvailable(project.getTwoRoomFlatsAvailable() - 1);
@@ -121,10 +152,9 @@ public class RequestManager {
                 }
 
                 // Save changes
-                //Write changes to Applicant
                 applicant.setProject(project.getProjectName());
                 ApplicantRepository.getInstance().update(applicant);
-                ProjectRepository.getInstance().update(project);
+                projectManager.updateProject(project);
 
             } catch (ModelNotFoundException e) {
                 e.printStackTrace();
@@ -143,20 +173,53 @@ public class RequestManager {
     private void approveProjectDeregistrationRequest(Request request) {
         if (request instanceof ProjectDeregistrationRequest deregistrationRequest) {
             String projectID = deregistrationRequest.getProjectID();
-            // Fix: Call getApplicantID() on the instance, not the class
-            Applicant applicant = ApplicantRepository.getInstance().getByID(deregistrationRequest.getApplicantID());
-
+            String applicantID = deregistrationRequest.getApplicantID();
+            Applicant applicant = ApplicantRepository.getInstance().getByID(applicantID);
+            
             try {
-                Project project = ProjectRepository.getInstance().getByID(projectID);
-
+                Project project = projectManager.getProjectByID(projectID);
+                
+                // Find original application request to determine room type
+                String originalRequestID = deregistrationRequest.getOriginalRequestID();
+                Request originalRequest = null;
+                
+                try {
+                    // Try to get by original request ID if available
+                    if (originalRequestID != null && !originalRequestID.isEmpty()) {
+                        originalRequest = RequestRepository.getInstance().getByID(originalRequestID);
+                    }
+                } catch (ModelNotFoundException e) {
+                    // If original request not found, search for any application request from this applicant
+                    originalRequest = getProjectApplicationRequestByApplicantID(applicantID);
+                }
+                
+                // Add back the housing slot to the project
+                if (originalRequest instanceof ProjectApplicationRequest applicationRequest) {
+                    RoomType roomType = applicationRequest.getRoomType();
+                    
+                    // Increment available flats based on the originally selected room type
+                    if (roomType == RoomType.TWO_ROOM_FLAT) {
+                        project.setTwoRoomFlatsAvailable(project.getTwoRoomFlatsAvailable() + 1);
+                        System.out.println("Added one 2-room flat back to the project inventory.");
+                    } else if (roomType == RoomType.THREE_ROOM_FLAT) {
+                        project.setThreeRoomFlatsAvailable(project.getThreeRoomFlatsAvailable() + 1);
+                        System.out.println("Added one 3-room flat back to the project inventory.");
+                    }
+                    
+                    // Save changes to the project
+                    projectManager.updateProject(project);
+                } else {
+                    // Cannot determine room type, log this situation
+                    System.out.println("Warning: Cannot determine room type for deregistration. Housing slot not restored.");
+                }
+                
                 // Update applicant status
                 applicant.setStatus(ApplicantStatus.UNREGISTERED);
                 applicant.setProject(null);
-
-                // Save changes
+                
+                // Save changes to applicant
                 ApplicantRepository.getInstance().update(applicant);
-                ProjectRepository.getInstance().update(project);
-
+                
             } catch (ModelNotFoundException e) {
                 e.printStackTrace();
             }
@@ -171,23 +234,31 @@ public class RequestManager {
      * @param request the project booking request
      * @throws IllegalArgumentException if the request is not a ProjectBookingRequest
      */
-    private void approveProjectBookingRequest(Request request) {
+    private void approveProjectBookingRequest(Request request) throws ModelNotFoundException {
         if (request instanceof ProjectBookingRequest bookingRequest) {
             String projectID = bookingRequest.getProjectID();
+            List<String> officerIDs = bookingRequest.getOfficerIDs();
             Applicant applicant = ApplicantRepository.getInstance().getByID(bookingRequest.getApplicantID());
-
-            try {
-                Project project = ProjectRepository.getInstance().getByID(projectID);
-
-                // Update applicant status
-                applicant.setStatus(ApplicantStatus.REGISTERED);
-
-                // Save changes
-                ApplicantRepository.getInstance().update(applicant);
-
-            } catch (ModelNotFoundException e) {
-                e.printStackTrace();
+            
+            // Check if applicant's status is REGISTERED before allowing booking
+            if (applicant.getStatus() != ApplicantStatus.REGISTERED) {
+                System.out.println("Error: Cannot approve booking request. Applicant's status must be REGISTERED. Current status: " + applicant.getStatus());
+                // Update request status to REJECTED
+                bookingRequest.setStatus(RequestStatus.REJECTED);
+                RequestRepository.getInstance().update(bookingRequest);
+                return;
             }
+            
+            // Update applicant status to BOOKED since they're currently REGISTERED
+            applicant.setStatus(ApplicantStatus.BOOKED);
+            // Save changes
+            ApplicantRepository.getInstance().update(applicant);
+            
+            // Update request status to APPROVED
+            bookingRequest.setStatus(RequestStatus.APPROVED);
+            RequestRepository.getInstance().update(bookingRequest);
+            
+            System.out.println("Booking request approved successfully. Applicant status updated to BOOKED.");
         } else {
             throw new IllegalArgumentException("Request is not a ProjectBookingRequest");
         }
@@ -217,7 +288,7 @@ public class RequestManager {
         try {
             Request request = RequestRepository.getInstance().getByID(requestID);
             approveRequest(request);
-            approveRequestForStatus(requestID);
+            // Don't call approveRequestForStatus again since approveOfficerRequest already sets status and updates
         } catch (ModelNotFoundException e) {
             e.printStackTrace();
         }
@@ -234,11 +305,7 @@ public class RequestManager {
 
             // Reset applicant status
             applicant.setStatus(ApplicantStatus.UNREGISTERED);
-            try {
-                ApplicantRepository.getInstance().update(applicant);
-            } catch (ModelNotFoundException e) {
-                e.printStackTrace();
-            }
+            ApplicantRepository.getInstance().update(applicant);
         } else {
             throw new IllegalArgumentException("Request is not a ProjectApplicationRequest");
         }

@@ -1,6 +1,7 @@
 package model.user;
 
 import java.util.Map;
+import java.util.HashMap;
 
 public class Manager implements User {
     private String managerID;
@@ -80,5 +81,22 @@ public class Manager implements User {
         this.name = map.get("name");
         // Default project value if not specified
         this.projectInCharge = map.get("projectInCharge") != null ? map.get("projectInCharge") : "No Project";
+        
+        // Log warnings if essential data is missing
+        if (this.managerID == null || this.name == null || this.nric == null) {
+            System.err.println("Warning: Manager missing required fields - ID: " + this.managerID + 
+                             ", NRIC: " + this.nric + ", Name: " + this.name);
+        }
     }
+
+    @Override
+    public Map<String, String> toMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("managerID", this.managerID);
+        map.put("nric", this.nric);
+        map.put("hashedPassword", this.hashedPassword);
+        map.put("name", this.name);
+        map.put("projectInCharge", this.projectInCharge != null ? this.projectInCharge : "No Project");
+        return map;
     }
+}

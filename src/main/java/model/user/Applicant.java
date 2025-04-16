@@ -118,6 +118,18 @@ public class Applicant implements User, Mappable {
         this.maritalStatus = MaritalStatus.fromString(status);
 
         this.project = map.get("project");
+
+        // Handle applicant status
+        String applicantStatus = map.get("status");
+        if (applicantStatus != null) {
+            try {
+                this.status = ApplicantStatus.valueOf(applicantStatus);
+            } catch (IllegalArgumentException e) {
+                this.status = ApplicantStatus.UNREGISTERED;
+            }
+        } else {
+            this.status = ApplicantStatus.UNREGISTERED;
+        }
     }
 
     public ApplicantStatus getStatus() {

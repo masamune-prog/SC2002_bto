@@ -6,71 +6,44 @@ import org.junit.jupiter.api.Test;
 import model.project.Project;
 import model.user.Manager;
 import model.user.Officer;
-import repository.project.ProjectRepository;
+import controller.project.ProjectManager; // Added import
 import repository.user.ManagerRepository;
 import repository.user.OfficerRepository;
-import utils.iocontrol.CSVReader;
 
 import java.util.List;
 import java.util.ArrayList;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 public class ProjectLoadTest {
 
-    private ProjectRepository projectRepository;
+    private ProjectManager projectManager; // Changed from ProjectRepository
     private ManagerRepository managerRepository;
     private OfficerRepository officerRepository;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
+        // Use ProjectManager to load data for the test
+        projectManager = new ProjectManager();
+        ProjectManager.loadProjectsFromCSV(); // Load data using the manager
+
         // Keep references to the same repositories throughout the test
         managerRepository = ManagerRepository.getInstance();
-        // Load officers first and store reference
         officerRepository = OfficerRepository.getInstance();
         officerRepository.load();
-
-        // Keep a reference to the officers to reuse later
-        List<Officer> allOfficers = new ArrayList<>(officerRepository.getAll());
-
-        // Load project repository (which will create its own officer repository)
-        projectRepository = ProjectRepository.getInstance();
-        projectRepository.load();
-
-        // Manually fix officer assignments if needed
-        fixOfficerAssignments(allOfficers);
     }
 
-    // Helper method to maintain officer references
-    private void fixOfficerAssignments(List<Officer> officers) {
-        // Get project CSV data directly
-        String filePath = projectRepository.getFilePath();
-        List<List<String>> csvData = CSVReader.read(filePath, true);
+    @Test
+    public void testLoadProjects() {
+        // Access projects through the manager
+        List<Project> projects = projectManager.getAllProjects();
+        assertNotNull(projects, "Project list should not be null");
+        assertFalse(projects.isEmpty(), "Project list should not be empty after loading");
 
-        // Process each project
-        for (List<String> row : csvData) {
-            if (row.size() >= 13) {
-                String projectName = row.get(0);
-                String officerName = row.get(12);
-
-                if (officerName != null && !officerName.isEmpty() && !officerName.equals("N/A")) {
-                    // Find matching officer
-                    Officer matchingOfficer = null;
-                    for (Officer officer : officers) {
-                        if (officer.getName().equals(officerName)) {
-                            matchingOfficer = officer;
-                            break;
-                        }
-                    }
-
-                    // Assign to project if found
-                    if (matchingOfficer != null) {
-                        Project project = projectRepository.getByProjectName(projectName);
-                        if (project != null) {
-                            project.assignOfficer(matchingOfficer);
-                        }
-                    }
-                }
-            }
-        }
+        // Example: Check a specific project if needed
+        // Project firstProject = projects.get(0);
+        // assertEquals("ExpectedProjectID", firstProject.getID());
     }
 
     @Test
@@ -87,7 +60,7 @@ public class ProjectLoadTest {
 
                 // Find projects managed by this manager
                 List<Project> managedProjects = new ArrayList<>();
-                for (Project p : projectRepository.getAll()) {
+                for (Project p : projectManager.getAllProjects()) {
                     if (p.getManagerInCharge() != null &&
                             p.getManagerInCharge().getName().equals(manager.getName())) {
                         managedProjects.add(p);
@@ -113,7 +86,7 @@ public class ProjectLoadTest {
 
                 // Find projects assigned to this officer
                 List<Project> assignedProjects = new ArrayList<>();
-                for (Project p : projectRepository.getAll()) {
+                for (Project p : projectManager.getAllProjects()) {
                     List<Officer> projectOfficers = p.getAssignedOfficers();
                     if (projectOfficers != null) {
                         for (Officer o : projectOfficers) {
@@ -134,7 +107,7 @@ public class ProjectLoadTest {
 
         // Display project details
         System.out.println("\n===== PROJECT DETAILS =====");
-        List<Project> projects = projectRepository.getAll();
+        List<Project> projects = projectManager.getAllProjects();
         if (projects != null) {
             for (Project project : projects) {
                 System.out.println("Project: " + project.getProjectName());

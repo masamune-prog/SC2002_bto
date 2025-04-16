@@ -64,7 +64,9 @@ public class ApplicantRepository extends Repository<Applicant> {
             load(txtFilePath);
             // Ensure all applicants have UNREGISTERED status
             for (Applicant applicant : getAll()) {
-                applicant.setStatus(ApplicantStatus.UNREGISTERED);
+                if (applicant.getStatus() == null) {
+                    applicant.setStatus(ApplicantStatus.UNREGISTERED);
+                }
             }
             System.out.println("Loaded applicant data from: " + txtFilePath);
         } else {
@@ -85,6 +87,20 @@ public class ApplicantRepository extends Repository<Applicant> {
             }
         }
         return null;
+    }
+    // Add this method to update and persist applicant changes
+    public void update(Applicant applicant) {
+        // Find and update the applicant in the list
+        List<Applicant> all = getAll();
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getID().equals(applicant.getID())) {
+                all.set(i, applicant);
+                break;
+            }
+        }
+        // Save the updated list to the .txt file
+        String txtFilePath = getFilePath().replace(".csv", ".txt");
+        save(txtFilePath);
     }
     private List<Map<String, String>> convertToMapList(List<List<String>> csvData) {
         List<Map<String, String>> result = new ArrayList<>();

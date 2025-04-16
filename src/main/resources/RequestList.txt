@@ -1,0 +1,3 @@
+requestType=OFFICER_REQUEST|requestID=R1|userName=David|nric=T1234567J|projectID=2|status=APPROVED
+requestType=PROJECT_APPLICATION_REQUEST|requestID=R2|managerID=1|applicantID=3|projectID=2|roomType=TWO_ROOM_FLAT|status=PENDING
+originalRequestID=R2|requestType=PROJECT_BOOKING_REQUEST|requestID=R3|bookingDate=2025-04-16|managerID=1|applicantID=3|projectID=2|officerID=3|roomType=TWO_ROOM_FLAT|status=APPROVED

@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import model.user.UserType;
 import utils.exception.ModelNotFoundException;
 
@@ -52,9 +53,14 @@ public class Project implements Model, Displayable {
         this.applicationClosingDate = applicationClosingDate;
         this.managerInCharge = managerInCharge;
         this.assignedOfficers = new ArrayList<>();
+        this.officerIDs = new ArrayList<>();  // Initialize officerIDs list
         this.numOfficers = 0; // Maximum 10 slots
-        this.officerIDs = new ArrayList<>();
         this.status = ProjectStatus.AVAILABLE;
+        
+        // Set managerID if manager is not null
+        if (managerInCharge != null) {
+            this.managerID = managerInCharge.getID();
+        }
     }
 
     public Project(Map<String, String> map) throws ModelNotFoundException {
@@ -67,7 +73,11 @@ public class Project implements Model, Displayable {
 
     public void fromMap(Map<String, String> map) throws ModelNotFoundException {
         this.projectID = map.get("projectID");
-        this.visibility = Boolean.parseBoolean(map.get("visibility"));
+        // Set visibility to true by default if not specified in the map
+        String visibilityStr = map.get("visible");
+        this.visibility = (visibilityStr == null || visibilityStr.isEmpty())
+                ? true  // Default to visible if not specified
+                : Boolean.parseBoolean(visibilityStr);
         this.projectName = map.get("projectName");
         this.neighborhood = map.get("neighborhood");
 
@@ -86,25 +96,37 @@ public class Project implements Model, Displayable {
             this.numOfficers = 0;
         }
 
-        // Parse dates if available
         String openingDate = map.get("applicationOpeningDate");
         String closingDate = map.get("applicationClosingDate");
-        if (openingDate != null) {
-            this.applicationOpeningDate = LocalDate.parse(openingDate);
-        }
-        if (closingDate != null) {
-            this.applicationClosingDate = LocalDate.parse(closingDate);
+        try {
+            if (openingDate != null && !openingDate.isEmpty()) {
+                this.applicationOpeningDate = LocalDate.parse(openingDate);
+            } else {
+                this.applicationOpeningDate = LocalDate.MIN; // Beginning of time
+            }
+
+            if (closingDate != null && !closingDate.isEmpty()) {
+                this.applicationClosingDate = LocalDate.parse(closingDate);
+            } else {
+                this.applicationClosingDate = LocalDate.MAX; // End of time
+            }
+        } catch (Exception e) {
+            // Set default dates if parsing fails
+            this.applicationOpeningDate = LocalDate.MIN;
+            this.applicationClosingDate = LocalDate.MAX;
         }
 
         this.assignedOfficers = new ArrayList<>();
+        this.officerIDs = new ArrayList<>();
+        this.status = ProjectStatus.AVAILABLE;
 
         // Load manager by name if provided
         String managerName = map.get("managerInCharge");
         if (managerName != null && !managerName.isEmpty()) {
             setManagerByName(managerName);
         }
-        //Load officers by name from the list provided
-        // the list is comma separated
+
+        // Load officers by name from the list provided
         String officerNames = map.get("officer");
         if (officerNames != null && !officerNames.isEmpty()) {
             String[] officerNameArray = officerNames.split(",");
@@ -249,7 +271,15 @@ public class Project implements Model, Displayable {
     }
 
     public int getNumOfficers() {
-        return assignedOfficers.size();
+        // Make sure numOfficers matches the actual number of officers in both lists
+        // for consistency between the officerIDs list and assignedOfficers list
+        int officerIDsCount = (officerIDs != null) ? officerIDs.size() : 0;
+        int assignedOfficersCount = (assignedOfficers != null) ? assignedOfficers.size() : 0;
+        
+        // Use the maximum value to ensure we're not undercounting
+        this.numOfficers = Math.max(officerIDsCount, assignedOfficersCount);
+        
+        return this.numOfficers;
     }
 
     public void setNumOfficers(int numOfficers) {
@@ -282,6 +312,17 @@ public class Project implements Model, Displayable {
         }
         if (!officerIDs.contains(officerID)) {
             officerIDs.add(officerID);
+            this.numOfficers++; // Increment numOfficers when adding a new officer ID
+            
+            // Also try to add to assignedOfficers list for consistency
+            try {
+                Officer officer = OfficerRepository.getInstance().getByID(officerID);
+                if (officer != null && !assignedOfficers.contains(officer)) {
+                    assignedOfficers.add(officer);
+                }
+            } catch (ModelNotFoundException e) {
+                // If officer can't be found, just continue - we have the ID at least
+            }
         }
     }
 
@@ -301,6 +342,43 @@ public class Project implements Model, Displayable {
     @Override
     public String getID() {
         return projectID;
+    }
+
+    @Override
+    public Map<String, String> toMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("projectID", this.projectID);
+        map.put("visibility", String.valueOf(this.visibility));
+        map.put("projectName", this.projectName);
+        map.put("neighborhood", this.neighborhood);
+        map.put("twoRoomFlatsAvailable", String.valueOf(this.twoRoomFlatsAvailable));
+        map.put("threeRoomFlatsAvailable", String.valueOf(this.threeRoomFlatsAvailable));
+        map.put("twoRoomFlatsPrice", String.valueOf(this.twoRoomFlatsPrice));
+        map.put("threeRoomFlatsPrice", String.valueOf(this.threeRoomFlatsPrice));
+        
+        // Handle dates
+        if (this.applicationOpeningDate != null) {
+            map.put("applicationOpeningDate", this.applicationOpeningDate.toString());
+        }
+        if (this.applicationClosingDate != null) {
+            map.put("applicationClosingDate", this.applicationClosingDate.toString());
+        }
+        
+        // Handle manager
+        if (this.managerInCharge != null) {
+            map.put("managerInCharge", this.managerInCharge.getName());
+            map.put("managerID", this.managerInCharge.getID());
+        }
+        
+        // Handle officers
+        if (this.officerIDs != null && !this.officerIDs.isEmpty()) {
+            map.put("officerIDs", String.join(",", this.officerIDs));
+        }
+        
+        map.put("numOfficerSlots", String.valueOf(this.numOfficers));
+        map.put("status", this.status.toString());
+        
+        return map;
     }
 
     private String getProjectInformationString() {

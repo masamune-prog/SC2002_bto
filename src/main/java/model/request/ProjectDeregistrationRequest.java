@@ -1,5 +1,6 @@
 package model.request;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ProjectDeregistrationRequest implements Request {
@@ -16,7 +17,7 @@ public class ProjectDeregistrationRequest implements Request {
                                         String withdrawalReason) {
         this.requestID = requestID;
         this.projectID = projectID;
-        this.status = status;
+        this.status = status != null ? status : RequestStatus.PENDING;
         this.managerID = managerID;
         this.applicantID = applicantID;
         this.originalRequestID = originalRequestID;
@@ -87,7 +88,8 @@ public class ProjectDeregistrationRequest implements Request {
     public void fromMap(Map<String, String> map) {
         this.requestID = map.get("requestID");
         this.projectID = map.get("projectID");
-        this.status = RequestStatus.valueOf(map.get("status"));
+        this.status = map.get("status") != null ? 
+                RequestStatus.valueOf(map.get("status")) : RequestStatus.PENDING;
         this.managerID = map.get("managerID");
         this.applicantID = map.get("applicantID");
         this.originalRequestID = map.get("originalRequestID");
@@ -96,14 +98,15 @@ public class ProjectDeregistrationRequest implements Request {
 
     @Override
     public Map<String, String> toMap() {
-        return Map.of(
-                "requestID", requestID,
-                "projectID", projectID,
-                "status", status.toString(),
-                "managerID", managerID,
-                "applicantID", applicantID,
-                "originalRequestID", originalRequestID,
-                "withdrawalReason", withdrawalReason
-        );
+        Map<String, String> map = new HashMap<>();
+        map.put("requestID", requestID);
+        map.put("projectID", projectID);
+        map.put("status", status != null ? status.toString() : null);
+        map.put("managerID", managerID);
+        map.put("applicantID", applicantID);
+        map.put("originalRequestID", originalRequestID);
+        map.put("withdrawalReason", withdrawalReason);
+        map.put("requestType", getRequestType().toString());
+        return map;
     }
 }

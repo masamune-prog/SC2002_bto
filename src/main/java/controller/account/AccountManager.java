@@ -22,7 +22,7 @@ public class AccountManager {
             throws PasswordIncorrectException, ModelNotFoundException {
         //get userID from userNRIC
         User user = UserFinder.findUser(userNRIC, userType);
-        System.out.println("User found: " + user.getNric() + " " + user.getID());
+        System.out.println("User found: " + user.getNRIC() + " " + user.getID());
         // Check if user exists
         if (user == null) {
             throw new ModelNotFoundException("User with NRIC " + userNRIC + " not found");

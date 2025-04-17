@@ -3,11 +3,14 @@ package controller.request;
 import controller.project.ProjectManager;
 import model.project.Project;
 import model.request.OfficerApplicationRequest;
+import model.request.Request;
 import model.request.RequestStatus;
 import model.user.Officer;
 import repository.request.RequestRepository;
 import repository.user.OfficerRepository;
 import utils.exception.ModelNotFoundException;
+
+import java.util.List;
 
 public class OfficerManager {
     private final RequestManager requestManager;
@@ -43,7 +46,18 @@ public class OfficerManager {
 
         return requestID;
     }
+    public List<Request> getPendingOfficerApplicationsRequest(String OfficerID) throws ModelNotFoundException {
+        List<Request> requests = requestRepository.getBookingRequestsByOfficer(OfficerID);
+        return requests.stream()
+                .filter(request -> request.getStatus() == RequestStatus.PENDING)
+                .toList();
 
+
+    }
+    public List<Request> getAllRequestHistory(String officerID) throws ModelNotFoundException {
+        return requestRepository.getBookingRequestsByOfficer(officerID);
+    }
+    /*
     public void approveOfficerApplication(String requestID) throws ModelNotFoundException {
         OfficerApplicationRequest request = (OfficerApplicationRequest) requestRepository.getByID(requestID);
         if (request == null) {
@@ -80,4 +94,5 @@ public class OfficerManager {
         request.reject();
         requestRepository.update(request);
     }
+     */
 }

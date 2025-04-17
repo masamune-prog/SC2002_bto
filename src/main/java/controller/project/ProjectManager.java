@@ -32,7 +32,7 @@ public class ProjectManager {
         this.managerRepository = ManagerRepository.getInstance();
         this.officerRepository = OfficerRepository.getInstance();
     }
-    public static void loadProjectsFromCSV() {
+public static void loadProjectsFromCSV() {
         ProjectRepository projectRepository = ProjectRepository.getInstance();
         String filePath = projectRepository.getFilePath();
         System.out.println("Loading projects from: " + filePath);

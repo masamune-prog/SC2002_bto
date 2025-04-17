@@ -11,6 +11,7 @@ import repository.user.ApplicantRepository;
 import utils.exception.ModelNotFoundException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,8 +33,8 @@ public class ApplicantManager {
      * Creates a new project application request
      *
      * @param applicantID the ID of the applicant
-     * @param projectID the ID of the project
-     * @param roomType the type of room requested
+     * @param projectID   the ID of the project
+     * @param roomType    the type of room requested
      * @return the ID of the created request
      * @throws ModelNotFoundException if the applicant or project is not found
      */
@@ -60,14 +61,14 @@ public class ApplicantManager {
         // Create request
         String requestID = requestManager.getNewRequestID();
         String managerID = project.getManagerInCharge() != null ? project.getManagerInCharge().getID() : null;
-        
+
         // Debug output to help diagnose manager ID issues
         System.out.println("DEBUG: Creating new application request");
         System.out.println("DEBUG: Project ID: " + projectID);
-        System.out.println("DEBUG: Project Manager: " + (project.getManagerInCharge() != null ? 
-                          project.getManagerInCharge().getName() : "null"));
+        System.out.println("DEBUG: Project Manager: " + (project.getManagerInCharge() != null ?
+                project.getManagerInCharge().getName() : "null"));
         System.out.println("DEBUG: Manager ID being assigned: " + managerID);
-        
+
         ProjectApplicationRequest request = new ProjectApplicationRequest(
                 requestID,
                 projectID,
@@ -86,8 +87,8 @@ public class ApplicantManager {
     /**
      * Creates a project deregistration request
      *
-     * @param applicantID the ID of the applicant
-     * @param withdrawalReason the reason for withdrawal
+     * @param applicantID       the ID of the applicant
+     * @param withdrawalReason  the reason for withdrawal
      * @param originalRequestID the ID of the original application request (optional)
      * @return the ID of the created request
      * @throws ModelNotFoundException if the applicant is not found
@@ -125,7 +126,7 @@ public class ApplicantManager {
     /**
      * Simplified method for creating a project deregistration request
      *
-     * @param applicantID the ID of the applicant
+     * @param applicantID      the ID of the applicant
      * @param withdrawalReason the reason for withdrawal
      * @return the ID of the created request
      * @throws ModelNotFoundException if the applicant is not found
@@ -138,10 +139,10 @@ public class ApplicantManager {
     /**
      * Creates a project booking request
      *
-     * @param applicantID the ID of the applicant
+     * @param applicantID       the ID of the applicant
      * @param originalRequestID the ID of the original application request
-     * @param officerIDs List of officer IDs assigned to the project
-     * @param roomType the type of room requested
+     * @param officerIDs        List of officer IDs assigned to the project
+     * @param roomType          the type of room requested
      * @return the ID of the created request
      * @throws ModelNotFoundException if the applicant or project is not found
      */
@@ -176,14 +177,20 @@ public class ApplicantManager {
         RequestRepository.getInstance().add(request);
         return requestID;
     }
+    public List<Request> getBookingRequestsByApplicant(String applicantID) throws ModelNotFoundException {
+        List<Request> bookingRequests = requestManager.getAllBookingRequests();
+        List<Request> requests = new ArrayList<>();
 
-    /**
-     * Finds a project by name
-     *
-     * @param projectName the name of the project
-     * @return the project, or null if not found
-     */
-    private Project findProjectByName(String projectName) {
-         return projectManager.getProjectByName(projectName); // Use ProjectManager
+        for (Request request : bookingRequests) {
+            if (request instanceof ProjectBookingRequest) {
+                ProjectBookingRequest bookingRequest = (ProjectBookingRequest) request;
+                if (bookingRequest.getApplicantID().equals(applicantID)) {
+                    requests.add(request);
+                }
+            }
+        }
+
+        return requests;
     }
+
 }

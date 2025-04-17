@@ -338,6 +338,16 @@ public class RequestManager {
             e.printStackTrace();
         }
     }
+    //get all Booking Requests
+    public List<Request> getAllBookingRequests() {
+        List<Request> requests = new ArrayList<>();
+        for (Request request : RequestRepository.getInstance().getAll()) {
+            if (request.getRequestType() == RequestType.PROJECT_BOOKING_REQUEST) {
+                requests.add(request);
+            }
+        }
+        return requests;
+    }
 
     /**
      * Gets a request by ID

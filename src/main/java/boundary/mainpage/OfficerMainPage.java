@@ -90,7 +90,7 @@ public class OfficerMainPage {
                     case 6 -> approveBookingRequests();
                     case 7 -> viewEnquiries();
                     case 8 -> replyToEnquiries();
-                    case 9 -> ChangeAccountPassword.changePassword(UserType.OFFICER, refreshedOfficer.getNric());
+                    case 9 -> ChangeAccountPassword.changePassword(UserType.OFFICER, refreshedOfficer.getNRIC());
                     case 10 -> ProjectViewer.viewAllProject();
                     case 11 -> showProjectApplicationRequests();
                     case 12 -> approveProjectApplication();
@@ -107,7 +107,7 @@ public class OfficerMainPage {
     private void viewPersonalDetails() throws PageBackException, ModelNotFoundException {
         System.out.println("\n=== Personal Details ===");
         System.out.println("Name: " + officer.getName());
-        System.out.println("NRIC: " + officer.getNric());
+        System.out.println("NRIC: " + officer.getNRIC());
         System.out.println("Projects in charge: ");
         List<Project> projects = projectManager.getProjectsByOfficer(officer.getID());
         if (projects.isEmpty()) {

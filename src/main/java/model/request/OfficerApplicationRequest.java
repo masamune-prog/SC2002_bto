@@ -27,7 +27,7 @@ public class OfficerApplicationRequest implements Request {
         this.projectID = project != null ? project.getID() : null; // Store the ID
         this.officer = officer;
         this.userName = officer != null ? officer.getName() : null;
-        this.nric = officer != null ? officer.getNric() : null;
+        this.nric = officer != null ? officer.getNRIC() : null;
         this.status = RequestStatus.PENDING;
     }
 

@@ -38,7 +38,7 @@ public class ManagerRepository extends Repository<Manager> {
     }
     public Manager getByNRIC(String nric) {
         for (Manager manager : getAll()) {
-            if (manager.getNric().equals(nric)) {
+            if (manager.getNRIC().equals(nric)) {
                 return manager;
             }
         }

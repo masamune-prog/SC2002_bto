@@ -1,14 +1,12 @@
 package model.user;
 
 import utils.iocontrol.Mappable;
-import utils.parameters.EmptyID;
-import utils.parameters.NotNull;
 
 import java.util.Map;
 
 public class Applicant implements User, Mappable {
     private String applicantID;
-    private String nric;
+    private String NRIC;
     private String hashedPassword;
     private String name;
     private int age;
@@ -17,7 +15,7 @@ public class Applicant implements User, Mappable {
     private ApplicantStatus status;
     public Applicant(String applicantID, String nric, String passwordHash, String name, int age, MaritalStatus maritalStatus, String project) {
         this.applicantID = applicantID;
-        this.nric = nric;
+        this.NRIC = nric;
         this.hashedPassword = passwordHash;
         this.name = name;
         this.age = age;
@@ -40,14 +38,13 @@ public class Applicant implements User, Mappable {
     }
 
     @Override
-    public String getNric() {
-        return nric;
+    public String getNRIC() {
+        return this.NRIC;
     }
 
-    @Override
-    public void setNric(String nric) {
-        this.nric = nric;
-    }
+   public void setNRIC(String nric) {
+        this.NRIC = nric;
+   }
 
     @Override
     public String getHashedPassword() {
@@ -103,7 +100,7 @@ public class Applicant implements User, Mappable {
     @Override
     public void fromMap(Map<String, String> map) {
         this.applicantID = map.get("applicantID");
-        this.nric = map.get("nric");
+        this.NRIC = map.get("nric");
         this.hashedPassword = map.get("hashedPassword");
         this.name = map.get("name");
 

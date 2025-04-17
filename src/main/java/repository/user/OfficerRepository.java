@@ -76,7 +76,7 @@ public class OfficerRepository extends Repository<Officer> {
                 for (Officer officer : getAll()) {
                     System.out.println("Loaded Officer - ID: " + officer.getID() +
                             ", Name: " + officer.getName() +
-                            ", NRIC: " + officer.getNric());
+                            ", NRIC: " + officer.getNRIC());
                 }
             }
         } catch (Exception e) {
@@ -95,7 +95,7 @@ public class OfficerRepository extends Repository<Officer> {
     }
     public Officer getByNRIC(String nric) {
         for (Officer officer : getAll()) {
-            if (officer.getNric() != null && officer.getNric().equals(nric)) {
+            if (officer.getNRIC() != null && officer.getNRIC().equals(nric)) {
                 return officer;
             }
         }
@@ -159,7 +159,7 @@ public class OfficerRepository extends Repository<Officer> {
                 getAll().add(officer);
                 System.out.println("Added officer: " + officer.getName() +
                         " (ID: " + officer.getID() +
-                        ", NRIC: " + officer.getNric() + ")");
+                        ", NRIC: " + officer.getNRIC() + ")");
             } catch (Exception e) {
                 System.err.println("Error parsing officer data: " + e.getMessage());
                 e.printStackTrace();

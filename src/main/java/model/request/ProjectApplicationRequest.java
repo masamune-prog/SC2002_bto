@@ -10,6 +10,7 @@ public class ProjectApplicationRequest implements Request {
     private String managerID;
     private String applicantID;
     private RoomType roomType;
+    private RequestType requestType = RequestType.PROJECT_APPLICATION_REQUEST;
 
     public ProjectApplicationRequest(String requestID, String projectID, RequestStatus status,
                                      String managerID, String applicantID, RoomType roomType) {
@@ -47,7 +48,7 @@ public class ProjectApplicationRequest implements Request {
 
     @Override
     public RequestType getRequestType() {
-        return RequestType.PROJECT_APPLICATION_REQUEST;
+        return requestType;
     }
 
     @Override
@@ -108,5 +109,9 @@ public class ProjectApplicationRequest implements Request {
         map.put("roomType", roomType != null ? roomType.toString() : null);
         map.put("requestType", getRequestType().toString());
         return map;
+    }
+
+    public void setRequestType(RequestType requestType) {
+        this.requestType = requestType;
     }
 }

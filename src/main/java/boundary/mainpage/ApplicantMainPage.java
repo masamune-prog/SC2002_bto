@@ -70,7 +70,7 @@ public class ApplicantMainPage {
                 System.out.println("\t9. View enquiry");
                 System.out.println("\t10. Delete enquiry");
                 System.out.println("\t11. Edit enquiry");
-                System.out.println("\t12. View successful booking");
+                System.out.println("\t12. View booking request");
                 System.out.println("\t13. Logout");
                 System.out.println(BoundaryStrings.separator);
 
@@ -94,7 +94,7 @@ public class ApplicantMainPage {
 
                 switch (choice) {
                     case 1 -> displayApplicantProfile(refreshedApplicant);
-                    case 2 -> ChangeAccountPassword.changePassword(UserType.APPLICANT, refreshedApplicant.getNric());
+                    case 2 -> ChangeAccountPassword.changePassword(UserType.APPLICANT, refreshedApplicant.getNRIC());
                     case 3 -> ProjectViewer.viewAvailableProjectList(refreshedApplicant);
                     case 4 -> viewApplicationStatus(refreshedApplicant);
                     case 5 -> applyForProject(refreshedApplicant);
@@ -104,7 +104,7 @@ public class ApplicantMainPage {
                     case 9 -> viewEnquiry(refreshedApplicant);
                     case 10 -> deleteEnquiry(refreshedApplicant);
                     case 11 -> editEnquiry(refreshedApplicant);
-                    case 12 -> viewSuccessfulBooking(refreshedApplicant);
+                    case 12 -> viewBookingRequest(refreshedApplicant);
                     case 13 -> {
                         Logout.logout();
                         displaying = false;
@@ -145,7 +145,7 @@ public class ApplicantMainPage {
         System.out.println("Applicant Profile");
         System.out.println("-----------------");
         System.out.println("Name: " + applicant.getName());
-        System.out.println("NRIC: " + applicant.getNric());
+        System.out.println("NRIC: " + applicant.getNRIC());
         System.out.println("Project: " + applicant.getProject());
         System.out.println("Status: " + applicant.getStatus());
         System.out.println("Press Enter to go back.");
@@ -518,12 +518,27 @@ public class ApplicantMainPage {
         scanner.nextLine();
         throw new PageBackException();
     }
-
-    private void viewSuccessfulBooking(Applicant applicant) throws PageBackException {
+    //TODO: Implement view successful booking
+    private void viewBookingRequest(Applicant applicant) throws PageBackException, ModelNotFoundException {
         ChangePage.changePage();
-        System.out.println("View Successful Booking feature is not yet implemented.");
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        throw new PageBackException();
+        System.out.println("View Booking Request");
+        List<Request> bookingRequests = applicantManager.getBookingRequestsByApplicant(applicant.getID());
+        //cast to ProjectBookingRequest, and get the project name and the request with the largest ID
+        if (bookingRequests.isEmpty()) {
+            System.out.println("No booking requests found.");
+        } else {
+            System.out.println("Your Booking Requests:");
+            System.out.println("----------------------");
+            for (Request request : bookingRequests) {
+                if (request instanceof ProjectApplicationRequest) {
+                    ProjectApplicationRequest bookingRequest = (ProjectApplicationRequest) request;
+                    System.out.println("Request ID: " + bookingRequest.getID());
+                    System.out.println("Project Name: " + ProjectRepository.getInstance().getByID(bookingRequest.getProjectID()).getProjectName());
+                    System.out.println("Status: " + bookingRequest.getStatus());
+                    System.out.println("Room Type: " + bookingRequest.getRoomType());
+                    System.out.println("----------------------");
+                }
+            }
+        }
     }
 }

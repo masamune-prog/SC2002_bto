@@ -167,6 +167,22 @@ public class ManagerManager {
     /**
      * Gets all project application requests pending manager review
      */
+    public List<Request> getAllPendingRequests(Manager manager) {
+        // Define the predicates separately to avoid ambiguity
+        Predicate<Request> managerPredicate = request ->
+                request.getManagerID() != null && request.getManagerID().equals(manager.getID());
+        Predicate<Request> statusPredicate = request ->
+                request.getStatus() == RequestStatus.PENDING;
+
+        List<Request> requests = requestRepository.findByRules(
+                managerPredicate, statusPredicate);
+
+        return requests.stream()
+                .filter(request -> request instanceof ProjectApplicationRequest ||
+                        request instanceof ProjectBookingRequest ||
+                        request instanceof ProjectDeregistrationRequest)
+                .collect(Collectors.toList());
+    }
     public List<ProjectApplicationRequest> getPendingApplicationRequests(Manager manager) {
         // Define the predicates separately to avoid ambiguity
         Predicate<Request> managerPredicate = request ->

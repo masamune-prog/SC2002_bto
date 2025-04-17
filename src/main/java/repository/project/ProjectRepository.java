@@ -3,7 +3,6 @@ package repository.project;
 import model.project.Project;
 import model.user.Manager;
 import repository.Repository;
-import repository.user.ManagerRepository;
 import utils.config.Location;
 import utils.iocontrol.CSVReader;
 
@@ -440,7 +439,7 @@ public class ProjectRepository extends Repository<Project> {
         return null;
     }
     //get by ID
-    public Project getProjectByID(String projectID) {
+    public Project getByProjectID(String projectID) {
         for (Project project : getAll()) {
             if (project.getID().equalsIgnoreCase(projectID)) {
                 return project;

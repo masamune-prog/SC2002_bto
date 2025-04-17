@@ -5,21 +5,21 @@ import java.util.HashMap;
 
 public class Manager implements User {
     private String managerID;
-    private String nric;
+    private String NRIC;
     private String hashedPassword;
     private String name;
     private String projectInCharge;
     /**
      * Constructs a new Manager object with the specified NRIC and default password.
      *
-     * @param nric          the NRIC of the manager.
+     * @param NRIC          the NRIC of the manager.
      * @param name          the name of the manager.
      * @param project       the project assigned to the manager.
      */
-    public Manager(String managerID, String nric, String passwordHash, String name,
+    public Manager(String managerID, String NRIC, String passwordHash, String name,
                    String project, String projectInCharge) {
         this.managerID = managerID;
-        this.nric = nric;
+        this.NRIC = NRIC;
         this.hashedPassword = passwordHash;
         this.name = name;
         this.projectInCharge = projectInCharge;
@@ -38,13 +38,13 @@ public class Manager implements User {
     }
 
     @Override
-    public String getNric() {
-        return nric;
+    public String getNRIC() {
+        return NRIC;
     }
 
     @Override
-    public void setNric(String nric) {
-        this.nric = nric;
+    public void setNRIC(String NRIC) {
+        this.NRIC = NRIC;
     }
 
     @Override
@@ -76,16 +76,16 @@ public class Manager implements User {
     @Override
     public void fromMap(Map<String, String> map) {
         this.managerID = map.get("managerID");
-        this.nric = map.get("nric");
+        this.NRIC = map.get("nric");
         this.hashedPassword = map.get("hashedPassword");
         this.name = map.get("name");
         // Default project value if not specified
         this.projectInCharge = map.get("projectInCharge") != null ? map.get("projectInCharge") : "No Project";
         
         // Log warnings if essential data is missing
-        if (this.managerID == null || this.name == null || this.nric == null) {
+        if (this.managerID == null || this.name == null || this.NRIC == null) {
             System.err.println("Warning: Manager missing required fields - ID: " + this.managerID + 
-                             ", NRIC: " + this.nric + ", Name: " + this.name);
+                             ", NRIC: " + this.NRIC + ", Name: " + this.name);
         }
     }
 
@@ -93,7 +93,7 @@ public class Manager implements User {
     public Map<String, String> toMap() {
         Map<String, String> map = new HashMap<>();
         map.put("managerID", this.managerID);
-        map.put("nric", this.nric);
+        map.put("NRIC", this.NRIC);
         map.put("hashedPassword", this.hashedPassword);
         map.put("name", this.name);
         map.put("projectInCharge", this.projectInCharge != null ? this.projectInCharge : "No Project");

@@ -4,8 +4,10 @@ public interface User extends Model {
     String getID();
     void setID(String id);
 
-    String getNric();
-    void setNric(String nric);
+
+    String getNRIC();
+
+    void setNRIC(String nric);
     /**
      * Gets the hashed password of the user
      *

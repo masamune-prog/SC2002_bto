@@ -100,7 +100,7 @@ public class ManagerMainPage {
                     case 8 -> approveOfficerRequest();
                     case 9 -> viewAllEnquiries();
                     case 10 -> replyToEnquiries();
-                    case 11 -> ChangeAccountPassword.changePassword(UserType.MANAGER, refreshedManager.getNric());
+                    case 11 -> ChangeAccountPassword.changePassword(UserType.MANAGER, refreshedManager.getNRIC());
                     case 12 -> showProjectApplicationRequests();
                     case 13 -> approveProjectApplication();
                     case 14 -> rejectProjectApplication();

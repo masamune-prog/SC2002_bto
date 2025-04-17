@@ -30,7 +30,7 @@ public class ApplicantRepository extends Repository<Applicant> {
     }
     public Applicant getByNRIC(String nric) {
         for (Applicant applicant : getAll()) {
-            if (applicant.getNric().equals(nric)) {
+            if (applicant.getNRIC().equals(nric)) {
                 return applicant;
             }
         }

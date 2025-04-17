@@ -7,7 +7,7 @@ import java.util.HashMap;
 import model.project.Project;
 public class Officer implements User {
     private String officerID;
-    private String nric;
+    private String NRIC;
     private String hashedPassword;
     private String name;
     private List<String> projectsInCharge;
@@ -21,7 +21,7 @@ public class Officer implements User {
     public Officer(String officerID, String nric, String hashedPassword, String name, String project,
                    List<String> projectsInCharge) {
         this.officerID = officerID;
-        this.nric = nric;
+        this.NRIC = nric;
         this.hashedPassword = hashedPassword;
         this.name = name;
         this.projectsInCharge = projectsInCharge != null ? projectsInCharge : new ArrayList<>();
@@ -42,14 +42,16 @@ public class Officer implements User {
 
     }
 
+
+
     @Override
-    public String getNric() {
-        return nric;
+    public String getNRIC() {
+        return NRIC;
     }
 
     @Override
-    public void setNric(String nric) {
-        this.nric = nric;
+    public void setNRIC(String nric) {
+        this.NRIC = NRIC;
     }
 
     @Override
@@ -76,7 +78,7 @@ public class Officer implements User {
     @Override
     public void fromMap(Map<String, String> map) {
         this.officerID = map.getOrDefault("officerID", "");
-        this.nric = map.getOrDefault("nric", "");
+        this.NRIC = map.getOrDefault("nric", "");
         this.hashedPassword = map.getOrDefault("hashedPassword", "");
         this.name = map.getOrDefault("name", "");
         this.projectsInCharge = new ArrayList<>(); // Initialize empty list
@@ -103,13 +105,13 @@ public class Officer implements User {
         System.out.println("Creating officer from map: " + 
                          "ID=" + this.officerID + 
                          ", Name=" + this.name + 
-                         ", NRIC=" + this.nric + 
+                         ", NRIC=" + this.NRIC +
                          ", Projects=" + this.projectsInCharge);
         
         // Validate required fields
-        if (this.officerID.isEmpty() || this.nric.isEmpty() || this.name.isEmpty()) {
+        if (this.officerID.isEmpty() || this.NRIC.isEmpty() || this.name.isEmpty()) {
             System.err.println("Warning: Officer missing required fields - ID: " + this.officerID + 
-                             ", NRIC: " + this.nric + ", Name: " + this.name);
+                             ", NRIC: " + this.NRIC + ", Name: " + this.name);
         }
     }
 
@@ -126,9 +128,9 @@ public class Officer implements User {
      * @param projectID the ID of the project to add
      * @return true if the project was added, false if it was already in the list
      */
-    public boolean addProject(String projectID) {
+    public void addProject(String projectID) {
         if (projectID == null || projectID.isEmpty()) {
-            return false;
+            return;
         }
         
         if (this.projectsInCharge == null) {
@@ -138,10 +140,10 @@ public class Officer implements User {
         // Check if the project is already in the list
         if (!this.projectsInCharge.contains(projectID)) {
             this.projectsInCharge.add(projectID);
-            return true;
+            return;
         }
         
-        return false;
+        return; // Project already exists in the list, do nothing
     }
 
     /**
@@ -161,7 +163,7 @@ public class Officer implements User {
     public Map<String, String> toMap() {
         Map<String, String> map = new HashMap<>();
         map.put("officerID", this.officerID);
-        map.put("nric", this.nric);
+        map.put("nric", this.NRIC);
         map.put("hashedPassword", this.hashedPassword);
         map.put("name", this.name);
         

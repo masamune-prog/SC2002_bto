@@ -1,8 +1,10 @@
 package model.user;
 
 import utils.iocontrol.Mappable;
+import model.request.RoomType;
 
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class Applicant implements User, Mappable {
     private String applicantID;
@@ -13,6 +15,8 @@ public class Applicant implements User, Mappable {
     private MaritalStatus maritalStatus; // Use enum instead of String
     private String project;
     private ApplicantStatus status;
+    private RoomType roomType;  // booked flat type, null if none
+
     public Applicant(String applicantID, String nric, String passwordHash, String name, int age, MaritalStatus maritalStatus, String project) {
         this.applicantID = applicantID;
         this.NRIC = nric;
@@ -21,6 +25,8 @@ public class Applicant implements User, Mappable {
         this.age = age;
         this.maritalStatus = maritalStatus;
         this.project = project;
+        // Set roomType null if no project
+        this.roomType = null;
     }
 
     public Applicant(Map<String, String> informationMap) {
@@ -127,6 +133,36 @@ public class Applicant implements User, Mappable {
         } else {
             this.status = ApplicantStatus.UNREGISTERED;
         }
+
+        // Determine roomType: null if no project, else parse from map
+        String rt = map.get("roomType");
+        if (this.project == null || this.project.isEmpty() || rt == null || rt.isEmpty()) {
+            this.roomType = null;
+        } else {
+            try {
+                this.roomType = RoomType.valueOf(rt);
+            } catch (IllegalArgumentException e) {
+                this.roomType = null;
+            }
+        }
+    }
+
+    /**
+     * Convert applicant fields to a map for TXT persistence.
+     */
+    @Override
+    public Map<String, String> toMap() {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("applicantID", getID());
+        map.put("name", getName());
+        map.put("nric", getNRIC());
+        map.put("age", String.valueOf(getAge()));
+        map.put("maritalStatus", getMaritalStatus().toString());
+        map.put("hashedPassword", getHashedPassword());
+        map.put("project", getProject() != null ? getProject() : "");
+        map.put("status", getStatus() != null ? getStatus().toString() : ApplicantStatus.UNREGISTERED.toString());
+        map.put("roomType", getRoomType() != null ? getRoomType().toString() : "");
+        return map;
     }
 
     public ApplicantStatus getStatus() {
@@ -134,5 +170,13 @@ public class Applicant implements User, Mappable {
     }
     public void setStatus(ApplicantStatus status) {
         this.status = status;
+    }
+
+    public RoomType getRoomType() {
+        return roomType;
+    }
+
+    public void setRoomType(RoomType roomType) {
+        this.roomType = roomType;
     }
 }

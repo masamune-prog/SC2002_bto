@@ -192,7 +192,7 @@ public static void loadProjectsFromCSV() {
     public List<Project> getAvailableProjects(Applicant applicant) {
         List<Project> availableProjects = new ArrayList<>();
 
-        // First, import the correct enum
+
         MaritalStatus marriedStatus = MaritalStatus.MARRIED;
         MaritalStatus singleStatus = MaritalStatus.SINGLE;
 
@@ -225,6 +225,17 @@ public static void loadProjectsFromCSV() {
 
                 if (isEligible) {
                     availableProjects.add(project);
+                }
+            }
+        }
+        // First, check if the applicant is also a officer
+        Officer officer = officerRepository.getByNRIC(applicant.getNRIC());
+        //if applicant is a Officer do not let them apply for the project that they are in charge off
+        //the officer obj stores the list of project ids they have been incharge of
+        if (officer != null) {
+            for (Project project : availableProjects) {
+                if (officer.getProjectsInCharge().contains(project.getID())) {
+                    availableProjects.remove(project);
                 }
             }
         }

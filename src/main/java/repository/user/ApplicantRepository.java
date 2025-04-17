@@ -148,4 +148,17 @@ public class ApplicantRepository extends Repository<Applicant> {
             }
         }
     }
+
+    @Override
+    public void save() {
+        String txtFilePath = getFilePath().replace(".csv", ".txt");
+        System.out.println("Attempting to save applicants to: " + txtFilePath);
+        try {
+            super.save(txtFilePath);
+            System.out.println("Successfully saved applicants to: " + txtFilePath);
+        } catch (Exception e) {
+            System.err.println("Error saving applicants to: " + txtFilePath);
+            e.printStackTrace();
+        }
+    }
 }

@@ -3,11 +3,17 @@ package repository;
 import model.Model;
 import utils.exception.ModelAlreadyExistsException;
 import utils.exception.ModelNotFoundException;
+import utils.iocontrol.Mappable;
 import utils.iocontrol.Savable;
+import utils.iocontrol.StringAndMapConvertor;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Repository abstract class provides the basic functionality for storing, retrieving, and managing a list of model objects.
@@ -171,6 +177,27 @@ public abstract class Repository<ModelObject extends Model> extends Savable<Mode
      */
     public void save() {
         save(getFilePath());
+    }
+
+    /**
+     * Saves the list of model objects to the specified file path.
+     *
+     * @param filePath the file path to save the data to
+     */
+    public void save(String filePath) {
+        System.out.println("Repository: Attempting to save data to: " + filePath);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (Mappable modelObject : getAll()) {
+                Map<String, String> map = modelObject.toMap();
+                String line = StringAndMapConvertor.mapToString(map);
+                writer.write(line);
+                writer.newLine();
+            }
+            System.out.println("Repository: Successfully saved data to: " + filePath);
+        } catch (IOException e) {
+            System.err.println("Repository: Error saving data to: " + filePath);
+            e.printStackTrace();
+        }
     }
 
     /**

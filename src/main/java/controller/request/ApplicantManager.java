@@ -5,11 +5,14 @@ import model.project.Project;
 import model.request.*;
 import model.user.Applicant;
 import model.user.ApplicantStatus;
+import model.user.Manager;
 import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
 import repository.user.ApplicantRepository;
+import repository.user.ManagerRepository;
 import utils.exception.ModelNotFoundException;
 
+import java.awt.print.Book;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +41,15 @@ public class ApplicantManager {
      * @return the ID of the created request
      * @throws ModelNotFoundException if the applicant or project is not found
      */
+    public Boolean isApplicantAManager(String applicantNRIC) throws ModelNotFoundException {
+        Manager manager = ManagerRepository.getInstance().getByNRIC(applicantNRIC);
+        if (manager != null) {
+            return false;
+        } else {
+            return true;
+        }
+
+    }
     public String createProjectApplicationRequest(String applicantID, String projectID, RoomType roomType)
             throws ModelNotFoundException {
         // Validate entities
@@ -79,8 +91,10 @@ public class ApplicantManager {
         );
 
         RequestRepository.getInstance().add(request);
+        // Update applicant status and booked room type
         applicant.setStatus(ApplicantStatus.PENDING);
-        ApplicantRepository.getInstance().update(applicant); // Update applicant status in repository
+        applicant.setRoomType(roomType);
+        ApplicantRepository.getInstance().update(applicant); // Persist applicant changes
         return requestID;
     }
 
@@ -120,6 +134,9 @@ public class ApplicantManager {
         );
 
         RequestRepository.getInstance().add(request);
+        // Clear applicant's roomType upon deregistration
+        applicant.setRoomType(null);
+        ApplicantRepository.getInstance().update(applicant);
         return requestID;
     }
 
@@ -150,6 +167,14 @@ public class ApplicantManager {
                                        List<String> officerIDs, String roomType)
             throws ModelNotFoundException {
         Applicant applicant = ApplicantRepository.getInstance().getByID(applicantID);
+        // prevent users who are managers from booking a flat
+        try {
+            if (!isApplicantAManager(applicant.getNRIC())) {
+                throw new IllegalStateException("Managers are not allowed to book flats");
+            }
+        } catch (ModelNotFoundException e) {
+            throw new IllegalStateException("Unable to verify user role: " + e.getMessage());
+        }
         LocalDate bookingDate = LocalDate.now();
         if (applicant.getStatus() != ApplicantStatus.REGISTERED) {
             throw new IllegalStateException("Applicant must be registered before booking");

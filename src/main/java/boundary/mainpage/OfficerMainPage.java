@@ -4,6 +4,7 @@ import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
 import boundary.modelviewer.ModelViewer;
 import boundary.modelviewer.ProjectViewer;
+import boundary.util.ListPrinter;
 import controller.account.user.UserFinder;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
@@ -12,12 +13,15 @@ import controller.request.RequestManager;
 import model.project.Project;
 import model.enquiry.Enquiry;
 import model.request.OfficerApplicationRequest;
+import model.request.ProjectBookingRequest;
 import model.request.Request;
 import model.request.RequestStatus;
+import model.user.Applicant;
 import model.user.Officer;
 import model.user.User;
 import model.user.UserType;
 import repository.enquiry.EnquiryRepository;
+import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
 import repository.user.OfficerRepository;
 import utils.exception.ModelNotFoundException;
@@ -25,6 +29,7 @@ import utils.exception.PageBackException;
 import utils.ui.ChangePage;
 import utils.ui.InputHelper;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -36,6 +41,7 @@ public class OfficerMainPage {
     private final OfficerManager officerManager;
     private final RequestManager requestManager;
     private final EnquiryRepository enquiryRepository;
+    private final ListPrinter<Project> projectPrinter;
 
     public OfficerMainPage(User user) {
         if (!(user instanceof Officer)) {
@@ -47,6 +53,8 @@ public class OfficerMainPage {
         this.officerManager = new OfficerManager();
         this.requestManager = new RequestManager();
         this.enquiryRepository = EnquiryRepository.getInstance();
+        // init project printer for this user
+        this.projectPrinter = new ListPrinter<>(Comparator.comparing(Project::getProjectName));
     }
 
     public static void officerMainPage(User user) throws ModelNotFoundException, PageBackException {
@@ -66,36 +74,38 @@ public class OfficerMainPage {
                 System.out.println("2. View projects in charge");
                 System.out.println("3. Apply to be officer for projects");
                 System.out.println("4. View officer applications");
-                System.out.println("5. View project booking requests");
-                System.out.println("6. Approve project booking requests");
-                System.out.println("7. View enquiries");
-                System.out.println("8. Reply to enquiries");
-                System.out.println("9. Change password");
-                System.out.println("10. View all projects");
-                System.out.println("11. View all BTO applications");
-                System.out.println("12. Approve BTO applications");
-                System.out.println("13. Reject BTO applications");
-                System.out.println("14. Debug request information");
+                System.out.println("5. View Project Application Requests");
+                System.out.println("6. Approve/Reject Project Application Requests");
+                System.out.println("7. View project booking requests");
+                System.out.println("8. Approve project booking requests");
+                System.out.println("9. View enquiries");
+                System.out.println("10. Reply to enquiries");
+                System.out.println("11. View all projects");
+                System.out.println("12. Change Project Filter/Sort");
+                System.out.println("13. Change password");
                 System.out.println("0. Logout");
 
-                int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 14);
+
+                int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 13);
 
                 switch (choice) {
-                    case 0 -> { Logout.logout(); isRunning = false; }
+                    case 0 -> {
+                        Logout.logout();
+                        isRunning = false;
+                    }
                     case 1 -> viewPersonalDetails();
                     case 2 -> viewProjectsInCharge();
                     case 3 -> applyForProjects();
                     case 4 -> viewOfficerApplications();
-                    case 5 -> viewBookingRequests();
-                    case 6 -> approveBookingRequests();
-                    case 7 -> viewEnquiries();
-                    case 8 -> replyToEnquiries();
-                    case 9 -> ChangeAccountPassword.changePassword(UserType.OFFICER, refreshedOfficer.getNRIC());
-                    case 10 -> ProjectViewer.viewAllProject();
-                    case 11 -> showProjectApplicationRequests();
-                    case 12 -> approveProjectApplication();
-                    case 13 -> rejectProjectApplication();
-                    case 14 -> debugRequestInfo();
+                    case 5 -> showProjectApplicationRequests(); // View Project Application Requests
+                    case 6 -> approveProjectApplication();        // Approve Project Application Requests
+                    case 8 -> viewBookingRequests();              // View project booking requests
+                    case 9 -> approveBookingRequests();           // Approve project booking requests, then generate a receipt
+                    case 10 -> viewEnquiries();                   // View enquiries
+                    case 11 -> replyToEnquiries();                // Reply to enquiries
+                    case 12 -> projectPrinter.print(projectManager.getAllProjects()); // View all projects
+                    case 13 -> changeProjectFilter();             // Change Project Filter/Sort
+                    case 14 -> ChangeAccountPassword.changePassword(UserType.OFFICER, refreshedOfficer.getNRIC()); // Change password
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
             } catch (PageBackException pbe) {
@@ -158,8 +168,20 @@ public class OfficerMainPage {
         System.out.println("\n=== Approve BTO Application ===");
         
         // Get all project application requests that are pending
+        //get all projects the Officer is involved in
+        List<Project> projects = projectManager.getProjectsByOfficer(officer.getID());
+        if (projects.isEmpty()) {
+            System.out.println("You are not in charge of any projects.");
+            return;
+        }
+        // Get all project application requests that are pending
         List<Request> requests = requestManager.getProjectApplicationRequests().stream()
                 .filter(request -> request.getStatus() == RequestStatus.PENDING)
+                .collect(Collectors.toList());
+        //if the ProjectApplicationRequest contains the projectID of the projects the officer is in charge of
+        requests = requests.stream()
+                .filter(request -> projects.stream()
+                        .anyMatch(project -> project.getProjectID().equals(request.getProjectID())))
                 .collect(Collectors.toList());
                 
         if (requests.isEmpty()) {
@@ -324,6 +346,24 @@ public class OfficerMainPage {
                 if (choice.equals("A")) {
                     requestManager.approveRequest(requestID);
                     System.out.println("Request approved successfully.");
+                    //Generate a receipt of Applicant Name, NRIC, age, maritial status, flat type booked and project details
+                    Request request = RequestRepository.getInstance().getByID(requestID);
+                    //turn into ProjectBookingRequest
+                    ProjectBookingRequest bookingRequest = (ProjectBookingRequest) request;
+                    Project project = ProjectRepository.getInstance().getByID(request.getProjectID());
+                    User user = UserFinder.findUserByID(bookingRequest.getApplicantID(), UserType.APPLICANT);
+                    Applicant applicant = (Applicant) user;
+                    System.out.println("Receipt:");
+                    System.out.println("Applicant Name: " + applicant.getName());
+                    System.out.println("Applicant NRIC: " + applicant.getNRIC());
+                    System.out.println("Applicant Age: " + applicant.getAge());
+                    System.out.println("Applicant Maritial Status: " + applicant.getMaritalStatus());
+                    System.out.println("Flat Type Booked: " + bookingRequest.getRoomType());
+                    System.out.println("Project Name: " + project.getProjectName());
+                    System.out.println("Project ID: " + project.getProjectID());
+                    System.out.println("Project Neighbourhood: " + project.getNeighborhood());
+                    System.out.println("Project Manager ID: " + project.getManagerInCharge().getID());
+
                 } else if (choice.equals("R")) {
                     requestManager.rejectRequestForStatus(requestID);
                     System.out.println("Request rejected successfully.");
@@ -388,6 +428,24 @@ public class OfficerMainPage {
             System.out.println("Reply sent successfully!");
         } catch (Exception e) {
             System.out.println("Failed to send reply: " + e.getMessage());
+        }
+    }
+
+    private void changeProjectFilter() {
+        System.out.println("\n=== Change Project Filter/Sort ===");
+        System.out.println("1. Sort by Project Name");
+        System.out.println("2. Sort by Project ID");
+        System.out.println("3. Filter by Visible Projects");
+        System.out.println("0. Back to Main Menu");
+
+        int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 4);
+
+        switch (choice) {
+            case 1 -> projectPrinter.setComparator(Comparator.comparing(Project::getProjectName));
+            case 2 -> projectPrinter.setComparator(Comparator.comparing(Project::getProjectID));
+            case 3 -> projectPrinter.setFilter(Project::isVisible);
+            case 0 -> { return; }
+            default -> System.out.println("Invalid choice. Please try again.");
         }
     }
 }

@@ -36,7 +36,7 @@ public abstract class Savable<MappableObject extends Mappable> {
         // Create a new .txt file path by replacing .csv with .txt
         String txtFilePath = FILE_PATH.replace(".csv", ".txt");
         File txtFile = new File(txtFilePath);
-        
+
         try (PrintWriter printWriter = new PrintWriter(new FileWriter(txtFile))) {
             final List<MappableObject> listOfMappableObjects = getAll();
             for (MappableObject mappableObject : listOfMappableObjects) {
@@ -59,10 +59,10 @@ public abstract class Savable<MappableObject extends Mappable> {
         String txtFilePath = FILE_PATH.replace(".csv", ".txt");
         File txtFile = new File(txtFilePath);
         File csvFile = new File(FILE_PATH);
-        
+
         List<Map<String, String>> listOfMappableObjects = new ArrayList<>();
         BufferedReader bufferedReader;
-        
+
         try {
             if (txtFile.exists()) {
                 bufferedReader = new BufferedReader(new FileReader(txtFile));
@@ -78,7 +78,7 @@ public abstract class Savable<MappableObject extends Mappable> {
                 txtFile.createNewFile();
                 bufferedReader = new BufferedReader(new FileReader(txtFile));
             }
-            
+
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 listOfMappableObjects.add(StringAndMapConvertor.stringToMap(line));
@@ -86,7 +86,7 @@ public abstract class Savable<MappableObject extends Mappable> {
         } catch (IOException e) {
             throw new RuntimeException("Data could not be loaded from file: " + txtFilePath + ". Error: " + e.getMessage());
         }
-        
+
         setAll(listOfMappableObjects);
     }
 }

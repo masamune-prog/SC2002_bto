@@ -44,7 +44,7 @@ public class ProjectRepository extends Repository<Project> {
     public String getFilePath() {
         return Location.RESOURCE_LOCATION + FILE_PATH;
     }
-    
+
     public String getTxtFilePath() {
         return Location.RESOURCE_LOCATION + TXT_FILE_PATH;
     }
@@ -54,7 +54,7 @@ public class ProjectRepository extends Repository<Project> {
         this.getAll().clear();
         String txtFilePath = getTxtFilePath();
         File txtFile = new File(txtFilePath);
-        
+
         if (txtFile.exists()) {
             // Load from .txt file
             loadFromTxt();
@@ -68,7 +68,7 @@ public class ProjectRepository extends Repository<Project> {
             System.out.println("Created new .txt file: " + txtFilePath);
         }
     }
-    
+
     /**
      * Loads projects from CSV file
      */
@@ -82,7 +82,7 @@ public class ProjectRepository extends Repository<Project> {
             System.err.println("Error loading projects from CSV: " + e.getMessage());
         }
     }
-    
+
     /**
      * Loads projects from TXT file
      */
@@ -94,27 +94,27 @@ public class ProjectRepository extends Repository<Project> {
                 System.out.println("TXT file not found: " + txtPath);
                 return;
             }
-            
+
             // Track existing project IDs to avoid duplicates
             List<String> existingProjectIDs = getAll().stream()
                     .map(Project::getID)
                     .collect(Collectors.toList());
-            
+
             int initialCount = getAll().size();
             int addedCount = 0;
-            
+
             try (BufferedReader reader = new BufferedReader(new FileReader(txtPath))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     if (line.trim().isEmpty()) {
                         continue;
                     }
-                    
+
                     // Parse the line into a map
                     Map<String, String> projectMap = new HashMap<>();
                     String[] pairs = line.split("\\|");
                     for (String pair : pairs) {
-                        String[] keyValue = pair.split("=", 2); // Split only on the first '=' 
+                        String[] keyValue = pair.split("=", 2); // Split only on the first '='
                         if (keyValue.length == 2) {
                             String key = keyValue[0].trim();
                             String value = keyValue[1].trim();
@@ -123,7 +123,7 @@ public class ProjectRepository extends Repository<Project> {
                             projectMap.put(key, value);
                         }
                     }
-                    
+
                     // Check if this project is already loaded from CSV
                     String projectID = projectMap.get("projectID");
                     if (projectID != null && !existingProjectIDs.contains(projectID)) {
@@ -139,9 +139,9 @@ public class ProjectRepository extends Repository<Project> {
                     }
                 }
             }
-            
+
             System.out.println("Loaded " + addedCount + " additional projects from TXT file: " + txtPath);
-            
+
             // If no projects were loaded from TXT file, try loading from CSV
             if (getAll().isEmpty()) {
                 System.out.println("No projects loaded from TXT file, attempting to load from CSV...");
@@ -150,7 +150,7 @@ public class ProjectRepository extends Repository<Project> {
         } catch (IOException e) {
             System.err.println("Error loading projects from TXT: " + e.getMessage());
             e.printStackTrace();
-            
+
             // If there's an error reading TXT file, fall back to CSV
             System.out.println("Falling back to CSV due to TXT file reading error");
             loadFromCSV();
@@ -241,50 +241,50 @@ public class ProjectRepository extends Repository<Project> {
             try (FileWriter writer = new FileWriter(getFilePath())) {
                 // Write the header line
                 writer.write("Project Name,Neighbourhood,Type 1,Number of units for Type 1,Selling price for Type 1,Type 2,Number of units for Type 2,Selling price for Type 2,Application opening date,Application closing date,Manager,Officer Slot,Officer\n");
-                
+
                 // Write each project as a CSV line
                 for (Project project : getAll()) {
                     StringBuilder line = new StringBuilder();
-                    
+
                     // Project Name
                     line.append(csvEscape(project.getProjectName())).append(",");
-                    
+
                     // Neighborhood
                     line.append(csvEscape(project.getNeighborhood())).append(",");
-                    
+
                     // Type 1 (2-room flats)
                     line.append("2-room").append(",");
-                    
+
                     // Number of units for Type 1
                     line.append(project.getTwoRoomFlatsAvailable()).append(",");
-                    
+
                     // Selling price for Type 1
                     line.append(project.getTwoRoomFlatsPrice()).append(",");
-                    
+
                     // Type 2 (3-room flats)
                     line.append("3-room").append(",");
-                    
+
                     // Number of units for Type 2
                     line.append(project.getThreeRoomFlatsAvailable()).append(",");
-                    
+
                     // Selling price for Type 2
                     line.append(project.getThreeRoomFlatsPrice()).append(",");
-                    
+
                     // Application opening date
                     line.append(formatDate(project.getApplicationOpeningDate())).append(",");
-                    
+
                     // Application closing date
                     line.append(formatDate(project.getApplicationClosingDate())).append(",");
-                    
+
                     // Manager
                     if (project.getManagerInCharge() != null) {
                         line.append(csvEscape(project.getManagerInCharge().getName()));
                     }
                     line.append(",");
-                    
+
                     // Officer Slot
                     line.append(project.getNumOfficers()).append(",");
-                    
+
                     // Officers - join multiple officer names with semicolons
                     if (!project.getAssignedOfficers().isEmpty()) {
                         List<String> officerNames = project.getAssignedOfficers().stream()
@@ -292,15 +292,15 @@ public class ProjectRepository extends Repository<Project> {
                                 .collect(Collectors.toList());
                         line.append(csvEscape(String.join(";", officerNames)));
                     }
-                    
+
                     // End the line
                     line.append("\n");
                     writer.write(line.toString());
                 }
-                
+
                 // Save also to ProjectList.txt for better compatibility with other parts of the system
                 saveTxtFormat();
-                
+
                 System.out.println("Saved " + getAll().size() + " projects to " + getFilePath());
             }
         } catch (IOException e) {
@@ -319,7 +319,7 @@ public class ProjectRepository extends Repository<Project> {
                 for (Project project : getAll()) {
                     // Create a map of the project's properties
                     Map<String, String> map = project.toMap();
-                    
+
                     // Format as key=value|key=value
                     StringBuilder sb = new StringBuilder();
                     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -344,7 +344,7 @@ public class ProjectRepository extends Repository<Project> {
     /**
      * Explicitly save projects to a text file.
      * This method can be called directly when you need to save only to TXT format.
-     * 
+     *
      * @param filePath Optional custom file path. If null, uses default path.
      * @return Number of projects saved
      */
@@ -353,7 +353,7 @@ public class ProjectRepository extends Repository<Project> {
         if (txtPath == null) {
             txtPath = getFilePath().replace(".csv", ".txt");
         }
-        
+
         try {
             // Ensure directory exists
             File file = new File(txtPath);
@@ -362,16 +362,16 @@ public class ProjectRepository extends Repository<Project> {
                 parentDir.mkdirs();
                 System.out.println("Created directory: " + parentDir.getAbsolutePath());
             }
-            
+
             System.out.println("Writing " + getAll().size() + " projects to: " + txtPath);
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(txtPath))) {
                 for (Project project : getAll()) {
                     // Create a map of the project's properties
                     Map<String, String> map = project.toMap();
-                    
+
                     // Debug: print the map content
                     System.out.println("Project " + project.getID() + " data: " + map.size() + " fields");
-                    
+
                     // Format as key=value|key=value
                     StringBuilder sb = new StringBuilder();
                     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -385,7 +385,7 @@ public class ProjectRepository extends Repository<Project> {
                     writer.write(sb.toString());
                     writer.newLine();
                 }
-                
+
                 System.out.println("Successfully saved " + getAll().size() + " projects to TXT file: " + txtPath);
                 return getAll().size();
             }
@@ -497,18 +497,18 @@ public class ProjectRepository extends Repository<Project> {
 
     /**
      * Finds projects matching the specified rules (predicates).
-     * 
+     *
      * @param rules predicates to filter projects
      * @return list of projects matching all rules
      */
     @SafeVarargs
     public final List<Project> findByRules(Predicate<Project>... rules) {
         List<Project> result = new ArrayList<>(getAll());
-        
+
         for (Predicate<Project> rule : rules) {
             result = result.stream().filter(rule).collect(Collectors.toList());
         }
-        
+
         return result;
     }
 }

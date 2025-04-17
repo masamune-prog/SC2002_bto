@@ -36,6 +36,7 @@ public class ManagerManager {
     /**
      * Creates a new project with the given details
      */
+
     public Project createProject(String projectID, String projectName, Manager manager,
                                  boolean visibility, String neighborhood, Integer twoRoomFlatsAvailable, Integer threeRoomFlatsAvailable, Double twoRoomFlatsPrice, Double threeRoomFlatsPrice, LocalDate applicationOpeningDate, LocalDate applicationClosingDate, Manager managerInCharge) {
         validateProjectData(projectName, manager);
@@ -43,7 +44,15 @@ public class ManagerManager {
                 neighborhood, twoRoomFlatsAvailable, threeRoomFlatsAvailable,
                 twoRoomFlatsPrice, threeRoomFlatsPrice,
                 applicationOpeningDate, applicationClosingDate, managerInCharge);
-
+        //check if the new project date clashes with the existing projects
+        List<Project> existingProjects = projectManager.findProjectsByRules(
+                p -> p.getNeighborhood().equals(neighborhood) &&
+                        (p.getApplicationOpeningDate().isBefore(applicationClosingDate) &&
+                                p.getApplicationClosingDate().isAfter(applicationOpeningDate))
+        );
+        if (!existingProjects.isEmpty()) {
+            throw new IllegalArgumentException("Project dates clash with existing projects in the same neighborhood");
+        }
         try {
             projectManager.addProject(project); // Use ProjectManager to add
         } catch (ModelAlreadyExistsException e) {

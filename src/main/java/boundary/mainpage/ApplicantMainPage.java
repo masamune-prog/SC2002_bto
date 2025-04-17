@@ -4,6 +4,7 @@ import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
 import boundary.modelviewer.ModelViewer;
 import boundary.modelviewer.ProjectViewer;
+import boundary.util.ListPrinter;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 import controller.request.ApplicantManager;
@@ -23,10 +24,12 @@ import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
 public class ApplicantMainPage {
+    private final ListPrinter<Project> projectPrinter;
     private final Applicant applicant;
     private final Scanner scanner;
     private final ProjectManager projectManager;
@@ -40,6 +43,8 @@ public class ApplicantMainPage {
         this.scanner = new Scanner(System.in);
         this.projectManager = new ProjectManager();
         this.applicantManager = new ApplicantManager();
+        // initialize project printer for persistent sort/filter
+        this.projectPrinter = new ListPrinter<>(Comparator.comparing(Project::getProjectName));
     }
 
     public static void applicantMainPage(User user) {
@@ -71,7 +76,8 @@ public class ApplicantMainPage {
                 System.out.println("\t10. Delete enquiry");
                 System.out.println("\t11. Edit enquiry");
                 System.out.println("\t12. View booking request");
-                System.out.println("\t13. Logout");
+                System.out.println("\t13. Change Project Filter/Sort");
+                System.out.println("\t14. Logout");
                 System.out.println(BoundaryStrings.separator);
 
                 System.out.println();
@@ -95,7 +101,7 @@ public class ApplicantMainPage {
                 switch (choice) {
                     case 1 -> displayApplicantProfile(refreshedApplicant);
                     case 2 -> ChangeAccountPassword.changePassword(UserType.APPLICANT, refreshedApplicant.getNRIC());
-                    case 3 -> ProjectViewer.viewAvailableProjectList(refreshedApplicant);
+                    case 3 -> projectManager.getAvailableProjects(refreshedApplicant);
                     case 4 -> viewApplicationStatus(refreshedApplicant);
                     case 5 -> applyForProject(refreshedApplicant);
                     case 6 -> withdrawApplication(refreshedApplicant);
@@ -105,7 +111,8 @@ public class ApplicantMainPage {
                     case 10 -> deleteEnquiry(refreshedApplicant);
                     case 11 -> editEnquiry(refreshedApplicant);
                     case 12 -> viewBookingRequest(refreshedApplicant);
-                    case 13 -> {
+                    case 13 -> changeProjectFilter();
+                    case 14 -> {
                         Logout.logout();
                         displaying = false;
                     }
@@ -147,6 +154,7 @@ public class ApplicantMainPage {
         System.out.println("Name: " + applicant.getName());
         System.out.println("NRIC: " + applicant.getNRIC());
         System.out.println("Project: " + applicant.getProject());
+        System.out.println("Room Type: " + (applicant.getRoomType() != null ? applicant.getRoomType() : "None"));
         System.out.println("Status: " + applicant.getStatus());
         System.out.println("Press Enter to go back.");
         scanner.nextLine();
@@ -540,5 +548,40 @@ public class ApplicantMainPage {
                 }
             }
         }
+    }
+
+    private void changeProjectFilter() {
+        System.out.println("\n=== Change Project Filter/Sort ===");
+        System.out.println("1. Filter by Neighborhood");
+        System.out.println("2. Filter by Flat Type Availability");
+        System.out.println("3. Sort by Project Name");
+        System.out.println("4. Sort by Closing Date");
+        System.out.println("5. Clear Filter and Sort");
+        System.out.println("0. Back to Menu");
+        int choice = IntGetter.readInt();
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter neighborhood: ");
+                String loc = scanner.nextLine();
+                projectPrinter.setFilter(p -> p.getNeighborhood().equalsIgnoreCase(loc));
+            }
+            case 2 -> {
+                RoomType[] types = RoomType.values();
+                for (int i = 0; i < types.length; i++) System.out.println((i + 1) + ". " + types[i]);
+                System.out.print("Select flat type: ");
+                int ct = IntGetter.readInt();
+                RoomType ty = types[ct - 1];
+                projectPrinter.setFilter(p -> p.getTwoRoomFlatsAvailable() > 0 && ty.name().contains("TWO") || p.getThreeRoomFlatsAvailable() > 0 && ty.name().contains("THREE"));
+            }
+            case 3 -> projectPrinter.setComparator(Comparator.comparing(Project::getProjectName));
+            case 4 -> projectPrinter.setComparator(Comparator.comparing(Project::getApplicationClosingDate));
+            case 5 -> {
+                projectPrinter.clearFilter();
+                projectPrinter.setComparator(Comparator.comparing(Project::getProjectName));
+            }
+            case 0 -> { /* back */ }
+            default -> System.out.println("Invalid choice.");
+        }
+        System.out.println("Filter/sort updated.");
     }
 }

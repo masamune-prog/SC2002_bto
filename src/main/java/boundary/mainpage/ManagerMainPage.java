@@ -3,8 +3,10 @@ package boundary.mainpage;
 import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
 import boundary.modelviewer.ProjectViewer;
+import boundary.util.ListPrinter;
 import controller.account.user.UserFinder;
 import controller.project.ProjectManager;
+import controller.report.ApplicantReportManager;
 import controller.request.ApplicantManager;
 import controller.request.ManagerManager;
 import controller.request.RequestManager;
@@ -14,8 +16,10 @@ import model.request.OfficerApplicationRequest;
 import model.request.ProjectApplicationRequest;
 import model.request.ProjectDeregistrationRequest;
 import model.request.Request;
+import model.request.RoomType;
 import model.user.Applicant;
 import model.user.Manager;
+import model.user.MaritalStatus;
 import model.user.User;
 import model.user.UserType;
 import repository.enquiry.EnquiryRepository;
@@ -31,6 +35,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 public class ManagerMainPage {
     private final Manager manager;
@@ -40,6 +45,7 @@ public class ManagerMainPage {
     private final RequestManager requestManager;
     private final RequestRepository requestRepository;
     private final EnquiryRepository enquiryRepository;
+    private final ListPrinter<Project> projectPrinter;  // persistent filter+sort for projects
 
     public ManagerMainPage(User user) {
         if (!(user instanceof Manager)) {
@@ -52,6 +58,8 @@ public class ManagerMainPage {
         this.requestManager = new RequestManager();
         this.requestRepository = RequestRepository.getInstance();
         this.enquiryRepository = EnquiryRepository.getInstance();
+        // Initialize project printer with default alphabetical order by project name
+        this.projectPrinter = new ListPrinter<>(Comparator.comparing(Project::getProjectName));
     }
 
     public static void managerMainPage(User user) throws ModelNotFoundException, PageBackException {
@@ -82,13 +90,13 @@ public class ManagerMainPage {
                 System.out.println("13. Approve BTO Applications");
                 System.out.println("14. Reject BTO Applications");
                 System.out.println("15. View All BTO Applications");
-                System.out.println("16. Debug Manager ID");
-                System.out.println("17. Logout");
+                System.out.println("16. Generate Applicant Report");
+                System.out.println("17. Change Project Filter");
+                System.out.println("18. Logout");
 
-                int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 17);
+                int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 19);
 
                 switch (choice) {
-                    case 17 -> { Logout.logout(); isRunning = false; }
                     case 1 -> createNewProject();
                     case 2 -> editProject();
                     case 3 -> deleteProject();
@@ -105,7 +113,9 @@ public class ManagerMainPage {
                     case 13 -> approveProjectApplication();
                     case 14 -> rejectProjectApplication();
                     case 15 -> showAllProjectApplicationRequests();
-                    case 16 -> debugManagerID(refreshedManager);
+                    case 16 -> generateApplicantReport();
+                    case 17 -> changeProjectFilter();
+                    case 18 -> { Logout.logout(); isRunning = false; }
                     default -> System.out.println("Invalid choice. Please try again.");
                 }
 
@@ -116,38 +126,6 @@ public class ManagerMainPage {
             } catch (PageBackException pbe) {
                 // Just return to main menu, do not logout
             }
-        }
-    }
-    private void debugManagerID(Manager manager) {
-        System.out.println("\n=== Debug Manager ID ===");
-        System.out.println("Current Manager ID: " + manager.getID());
-        
-        // Show all requests with their manager IDs
-        List<Request> requests = requestRepository.getAll();
-        System.out.println("\nAll Requests and their Manager IDs:");
-        if (requests.isEmpty()) {
-            System.out.println("No requests found in the system.");
-            return;
-        }
-        
-        for (Request request : requests) {
-            System.out.println("Request ID: " + request.getID() + 
-                " | Type: " + request.getRequestType() + 
-                " | Manager ID: " + request.getManagerID());
-        }
-        
-        // Show all projects with their manager IDs
-        List<Project> projects = projectManager.getAllProjects();
-        System.out.println("\nAll Projects and their Manager IDs:");
-        if (projects.isEmpty()) {
-            System.out.println("No projects found in the system.");
-            return;
-        }
-        
-        for (Project project : projects) {
-            System.out.println("Project ID: " + project.getID() + 
-                " | Name: " + project.getProjectName() + 
-                " | Manager ID: " + (project.getManagerInCharge() != null ? project.getManagerInCharge().getID() : "None"));
         }
     }
 
@@ -616,6 +594,89 @@ public class ManagerMainPage {
             }
         } catch (Exception e) {
             System.out.println("Failed to reject deregistration request: " + e.getMessage());
+        }
+    }
+
+    private void generateApplicantReport() {
+        System.out.println("\n=== Generate Applicant Report ===");
+        // Choose filters
+        MaritalStatus maritalFilter = null;
+        if (InputHelper.getBooleanInput(scanner, "Filter by marital status? (yes/no): ")) {
+            MaritalStatus[] statuses = MaritalStatus.values();
+            for (int i = 0; i < statuses.length; i++) {
+                System.out.println((i + 1) + ". " + statuses[i]);
+            }
+            int msChoice = InputHelper.getIntInput(scanner, "Select marital status: ", 1, statuses.length);
+            maritalFilter = statuses[msChoice - 1];
+        }
+        RoomType roomFilter = null;
+        if (InputHelper.getBooleanInput(scanner, "Filter by flat type? (yes/no): ")) {
+            RoomType[] types = RoomType.values();
+            for (int i = 0; i < types.length; i++) {
+                System.out.println((i + 1) + ". " + types[i]);
+            }
+            int rtChoice = InputHelper.getIntInput(scanner, "Select flat type: ", 1, types.length);
+            roomFilter = types[rtChoice - 1];
+        }
+        // Filter by project name
+        String filterProject = null;
+        if (InputHelper.getBooleanInput(scanner, "Filter by project name? (yes/no): ")) {
+            filterProject = InputHelper.getStringInput(scanner, "Enter project name: ");
+        }
+        // Filter by age range
+        Integer minAge = null, maxAge = null;
+        if (InputHelper.getBooleanInput(scanner, "Filter by age range? (yes/no): ")) {
+            minAge = InputHelper.getIntInput(scanner, "Enter minimum age: ", 0, Integer.MAX_VALUE);
+            maxAge = InputHelper.getIntInput(scanner, "Enter maximum age: ", minAge, Integer.MAX_VALUE);
+        }
+        // Generate report
+        ApplicantReportManager reportManager = new ApplicantReportManager();
+        var report = reportManager.generateReport(maritalFilter, roomFilter, filterProject, minAge, maxAge);
+        if (report.isEmpty()) {
+            System.out.println("No matching entries found.");
+            return;
+        }
+        // Display report
+        System.out.printf("%-20s %-5s %-15s %-20s %-10s%n", "Name", "Age", "Marital Status", "Project", "Flat Type");
+        System.out.println("--------------------------------------------------------------------------------");
+        for (ApplicantReportManager.ReportEntry entry : report) {
+            System.out.printf("%-20s %-5d %-15s %-20s %-10s%n",
+                entry.applicantName,
+                entry.age,
+                entry.maritalStatus,
+                entry.projectName,
+                entry.roomType
+            );
+        }
+    }
+
+    private void changeProjectFilter() {
+        System.out.println("\n=== Change Project Filter ===");
+        System.out.println("1. Filter by Neighborhood");
+        System.out.println("2. Filter by Visibility");
+        System.out.println("3. Clear Filter");
+        System.out.println("0. Back to Main Menu");
+        int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 3);
+
+        switch (choice) {
+            case 1 -> {
+                String neighborhood = InputHelper.getStringInput(scanner, "Enter neighborhood to filter: ");
+                projectPrinter.setFilter(project -> project.getNeighborhood().equalsIgnoreCase(neighborhood));
+                System.out.println("Neighborhood filter applied.");
+            }
+            case 2 -> {
+                boolean visible = InputHelper.getBooleanInput(scanner, "Filter by visibility (yes/no): ");
+                projectPrinter.setFilter(project -> project.isVisible() == visible);
+                System.out.println("Visibility filter applied.");
+            }
+            case 3 -> {
+                projectPrinter.clearFilter();
+                System.out.println("All filters cleared.");
+            }
+            case 0 -> {
+                // back to menu
+            }
+            default -> System.out.println("Invalid choice.");
         }
     }
 }

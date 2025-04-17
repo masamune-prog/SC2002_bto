@@ -77,14 +77,19 @@ public class Officer implements User {
 
     @Override
     public void fromMap(Map<String, String> map) {
-        this.officerID = map.getOrDefault("officerID", "");
-        this.NRIC = map.getOrDefault("nric", "");
-        this.hashedPassword = map.getOrDefault("hashedPassword", "");
-        this.name = map.getOrDefault("name", "");
+        // Debug logging to understand what's in the map
+        System.out.println("Officer fromMap called with map: " + map);
+        
+        // Get values by case-insensitive key lookup to handle possible inconsistencies
+        this.officerID = getCaseInsensitive(map, "officerID");
+        this.NRIC = getCaseInsensitive(map, "nric", "NRIC");
+        this.hashedPassword = getCaseInsensitive(map, "hashedPassword");
+        this.name = getCaseInsensitive(map, "name");
+        
         this.projectsInCharge = new ArrayList<>(); // Initialize empty list
         
         // Load projects in charge from CSV
-        String projectsInChargeStr = map.get("projectsInCharge");
+        String projectsInChargeStr = getCaseInsensitive(map, "projectsInCharge", "projects");
         if (projectsInChargeStr != null && !projectsInChargeStr.isEmpty()) {
             // Skip processing if it's just the empty array string representation
             if (projectsInChargeStr.equals("[]")) {
@@ -109,10 +114,40 @@ public class Officer implements User {
                          ", Projects=" + this.projectsInCharge);
         
         // Validate required fields
-        if (this.officerID.isEmpty() || this.NRIC.isEmpty() || this.name.isEmpty()) {
+        if (this.officerID == null || this.officerID.isEmpty() || 
+            this.NRIC == null || this.NRIC.isEmpty() || 
+            this.name == null || this.name.isEmpty()) {
             System.err.println("Warning: Officer missing required fields - ID: " + this.officerID + 
                              ", NRIC: " + this.NRIC + ", Name: " + this.name);
+            // Debug: List all keys in the map to help diagnose the problem
+            System.err.println("Available keys in map: " + String.join(", ", map.keySet()));
         }
+    }
+
+    /**
+     * Helper method to get a value from a map by key, ignoring case
+     * @param map the map to search in
+     * @param keys one or more possible keys to try (in order)
+     * @return the value, or null if no matching key is found
+     */
+    private String getCaseInsensitive(Map<String, String> map, String... keys) {
+        // First try direct lookup with the exact keys
+        for (String key : keys) {
+            if (map.containsKey(key)) {
+                return map.get(key);
+            }
+        }
+        
+        // Then try case-insensitive lookup
+        for (String key : keys) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(key)) {
+                    return entry.getValue();
+                }
+            }
+        }
+        
+        return null;
     }
 
     public List<String> getProjectsInCharge() {

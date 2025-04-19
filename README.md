@@ -33,7 +33,7 @@ java -cp target/SC2002_BTO_EXP-1.0-SNAPSHOT.jar Main
 
 The UML Diagrams are in the UML Folder with a [draw.io](http://draw.io) file and jpeg for viewing
 
-The Sequence Diagrams are in the UML Folder and was made using Visual Paradigm
+The Sequence Diagrams are in the Sequence Diagram UML Folder and was made using Visual Paradigm
 
 # Usage
 

@@ -142,7 +142,16 @@ public class EnquiryManager {
             throw new ModelNotFoundException("Enquiry with ID " + enquiryID + " not found");
         }
     }
-
+    public static void editEnquiry(String enquiryID, String enquiryTitle, String enquiryDescription) throws ModelNotFoundException {
+        Enquiry enquiry = EnquiryRepository.getInstance().getByID(enquiryID);
+        if (enquiry != null) {
+            enquiry.setEnquiryTitle(enquiryTitle);
+            enquiry.setContent(enquiryDescription);
+            EnquiryRepository.getInstance().update(enquiry);
+        } else {
+            throw new ModelNotFoundException("Enquiry with ID " + enquiryID + " not found");
+        }
+    }
     /**
      * Retrieves a list of all enquiries from the repository.
      *

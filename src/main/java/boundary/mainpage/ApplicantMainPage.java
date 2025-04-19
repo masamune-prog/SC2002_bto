@@ -108,8 +108,8 @@ public class ApplicantMainPage {
             System.out.println("Press Enter to go back.");
             throw new PageBackException();
         }
-        ProjectManager.getAvailableProject(applicant.getNRIC());
-        ProjectViewer.viewAvailableProjects(applicant);
+        List<Project> projects = ProjectManager.getAvailableProject(applicant.getNRIC());
+        ProjectViewer.displayProjects(projects);
     }
 
     private static void viewApplicationStatus(String applicantID) throws PageBackException, ModelNotFoundException {
@@ -364,11 +364,11 @@ public class ApplicantMainPage {
         if (choice == 1) {
             System.out.println("Enter new Title:");
             String newTitle = scanner.nextLine();
-            EnquiryManager.updateEnquiry(enquiryID, newTitle, enquiry.getAnswer());
+            EnquiryManager.editEnquiry(enquiryID, newTitle, enquiry.getContent());
         } else if (choice == 2) {
             System.out.println("Enter new Description:");
             String newDescription = scanner.nextLine();
-            EnquiryManager.updateEnquiry(enquiryID, enquiry.getEnquiryTitle(), newDescription);
+            EnquiryManager.editEnquiry(enquiryID, enquiry.getEnquiryTitle(), newDescription);
         } else {
             System.out.println("Invalid choice. Press Enter to go back.");
             scanner.nextLine();

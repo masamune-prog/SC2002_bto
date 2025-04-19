@@ -1,7 +1,6 @@
 package model.user;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -85,14 +84,6 @@ public class Manager implements User {
     @Override
     public Object getUserType() {
         return UserType.MANAGER;
-    }
-
-    public String getManagerName() {
-        return managerName;
-    }
-
-    public void setManagerName(String managerName) {
-        this.managerName = managerName;
     }
 
     public List<String> getProjectIDsInCharge() {

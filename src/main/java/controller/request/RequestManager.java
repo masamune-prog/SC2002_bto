@@ -6,11 +6,8 @@ import model.project.RoomType;
 import model.request.*;
 import model.user.Applicant;
 import model.user.ApplicantStatus;
-import model.user.Manager;
-import model.user.Officer;
 import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
-import repository.user.OfficerRepository;
 import utils.exception.ModelAlreadyExistsException;
 import utils.exception.ModelNotFoundException;
 

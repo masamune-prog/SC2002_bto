@@ -101,7 +101,7 @@ public class AccountManager {
     public static User register(UserType userType, String userNRIC, String password, String name,
                                 int age, MaritalStatus maritalStatus, String projectID, RoomType roomType)
             throws ModelAlreadyExistsException {
-        User user = UserFactory.create(userType, userNRIC, password, name, age, maritalStatus, projectID, roomType);
+        User user = UserFactory.create(userType, userNRIC, password, name, age, maritalStatus);
         UserAdder.addUser(user);
         return user;
     }

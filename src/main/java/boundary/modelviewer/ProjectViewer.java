@@ -48,27 +48,39 @@ public class ProjectViewer {
      * @param projects the list of projects to display
      */
     public static void displayProjects(List<Project> projects) {
+        // Determine the maximum width for each column dynamically
+        int idWidth = Math.max(8, projects.stream().mapToInt(p -> p.getID().length()).max().orElse(8));
+        int titleWidth = Math.max(28, projects.stream().mapToInt(p -> p.getProjectTitle().length()).max().orElse(28));
+        int dateWidth = 12; // Fixed width for dates
+        int roomWidth = Math.max(26, projects.stream()
+                .mapToInt(p -> String.format("$%.2f, %d", p.getTwoRoomFlatPrice(), p.getTwoRoomFlatAvailable()).length())
+                .max().orElse(26));
+
         // Print table header
-        System.out.println("┌──────────┬───────────────────────┬──────────────┬──────────────┬─────────────────┬─────────────────┐");
-        System.out.printf("│ %-8s │ %-21s │ %-12s │ %-12s │ %-15s │ %-15s │\n",
+        String headerFormat = String.format("┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
+                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth);
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
+
+        String columnFormat = String.format("│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
+                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth);
+        System.out.printf(columnFormat + "\n",
                 "ID", "Title", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)");
-        System.out.println("├──────────┼───────────────────────┼──────────────┼──────────────┼─────────────────┼─────────────────┤");
+
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
 
         // Print each project
         for (Project project : projects) {
-            System.out.printf("│ %-8s │ %-21s │ %-12s │ %-12s │ $%-6.2f, %-5d │ $%-6.2f, %-5d │\n",
+            System.out.printf(columnFormat + "\n",
                     project.getID(),
-                    truncateString(project.getProjectTitle(), 21),
+                    project.getProjectTitle(),
                     project.getApplicationOpeningDate().format(DATE_FORMATTER),
                     project.getApplicationClosingDate().format(DATE_FORMATTER),
-                    project.getTwoRoomFlatPrice(),
-                    project.getTwoRoomFlatAvailable(),
-                    project.getThreeRoomFlatPrice(),
-                    project.getThreeRoomFlatAvailable());
+                    String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), project.getTwoRoomFlatAvailable()),
+                    String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), project.getThreeRoomFlatAvailable()));
         }
 
         // Print table footer
-        System.out.println("└──────────┴───────────────────────┴──────────────┴──────────────┴─────────────────┴─────────────────┘");
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
     }
 
     /**

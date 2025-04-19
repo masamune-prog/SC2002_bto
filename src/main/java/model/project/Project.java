@@ -5,6 +5,7 @@ import model.Model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class Project implements Model, Displayable {
@@ -132,14 +133,18 @@ public class Project implements Model, Displayable {
     // Output the project contents nicely TODO
     @Override
     public String getDisplayableString() {
-        // Print table header
-        System.out.println("┌──────────┬───────────────────────┬───────────────────────┬──────────────┬──────────────┬─────────────────┬─────────────────┐");
-        System.out.printf("│ %-8s │ %-21s │ %-21s │ %-12s │ %-12s │ %-15s │ %-15s │\n",
-                "ID", "Title", "Neighbourhood", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)");
-        System.out.println("├──────────┼───────────────────────┼───────────────────────┼──────────────┼──────────────┼─────────────────┼─────────────────┤");
+        // Use Locale.US to ensure '.' as decimal separator if needed, adjust if necessary
+        Locale locale = Locale.US;
+        StringBuilder sb = new StringBuilder();
 
-        // Print each project
-        System.out.printf("│ %-8s │ %-21s │ %-21s │ %-12s │ %-12s │ $%-6.2f, %-5d │ $%-6.2f, %-5d │\n",
+        // Build table header
+        sb.append("┌──────────┬───────────────────────┬───────────────────────┬──────────────┬──────────────┬───────────────────┬───────────────────┐\n");
+        sb.append(String.format("│ %-8s │ %-21s │ %-21s │ %-12s │ %-12s │ %-17s │ %-17s │\n",
+                "ID", "Title", "Neighbourhood", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)"));
+        sb.append("├──────────┼───────────────────────┼───────────────────────┼──────────────┼──────────────┼───────────────────┼───────────────────┤\n"); // Adjusted dashes
+
+        // Build project row (using the defined Locale)
+        sb.append(String.format(locale, "│ %-8s │ %-21s │ %-21s │ %-12s │ %-12s │ $%-6.2f, %-5d │ $%-6.2f, %-5d │\n",
                 this.projectID,
                 this.projectTitle,
                 this.neighbourhood,
@@ -148,12 +153,12 @@ public class Project implements Model, Displayable {
                 this.twoRoomFlatPrice,
                 this.twoRoomFlatAvailable,
                 this.threeRoomFlatPrice,
-                this.threeRoomFlatAvailable);
+                this.threeRoomFlatAvailable));
 
-        // Print table footer
-        System.out.println("└──────────┴───────────────────────┴───────────────────────┴──────────────┴──────────────┴─────────────────┴─────────────────┘");
+        // Build table footer
+        sb.append("└──────────┴───────────────────────┴───────────────────────┴──────────────┴──────────────┴───────────────────┴───────────────────┘\n"); // Adjusted dashes
 
-        return ""; // Or return the formatted string instead of printing, if needed
+        return sb.toString();
     }
 
     @Override

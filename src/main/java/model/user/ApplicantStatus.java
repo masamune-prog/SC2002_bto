@@ -9,10 +9,6 @@ public enum ApplicantStatus {
      */
     PENDING,
     /**
-     * the applicant has deregistered a project
-     */
-    UNSUCCESSFUL,
-    /**
      * the applicant has registered a project
      */
     SUCCESSFUL,

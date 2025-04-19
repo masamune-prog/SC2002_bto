@@ -1,15 +1,11 @@
 package boundary.mainpage;
 
-import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
-import boundary.modelviewer.ProjectViewer;
 import boundary.modelviewer.ListPrinter;
-import controller.account.user.UserFinder;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 //import controller.report.ApplicantReportManager;
 import controller.report.ApplicantReportManager;
-import controller.request.ApplicantManager;
 import controller.request.ManagerManager;
 import controller.request.OfficerManager;
 import controller.request.RequestManager;
@@ -17,29 +13,20 @@ import model.Displayable;
 import model.project.Project;
 import model.enquiry.Enquiry;
 import model.request.OfficerApplicationRequest;
-import model.request.ProjectApplicationRequest;
 import model.request.ProjectWithdrawalRequest;
 import model.request.Request;
 import model.project.RoomType;
-import model.user.Applicant;
 import model.user.Manager;
 import model.user.MaritalStatus;
 import model.user.User;
-import model.user.UserType;
 import repository.enquiry.EnquiryRepository;
 import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
-import repository.user.ApplicantRepository;
-import repository.user.ManagerRepository;
-import repository.user.OfficerRepository;
-import utils.exception.ModelAlreadyExistsException;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
-import utils.ui.ChangePage;
 import utils.ui.InputHelper;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -701,52 +688,6 @@ public class ManagerMainPage {
 
         System.out.println("────────────────────────────────────────");
         //System.out.println("Press Enter to go back.");
-    }
-
-    /**
-     * Approves a project deregistration request
-     */
-    private void approveDeregistrationRequest(List<ProjectWithdrawalRequest> requests) {
-        if (requests.isEmpty()) {
-            System.out.println("No pending deregistration requests available to approve.");
-            return;
-        }
-
-        int requestIndex = InputHelper.getIntInput(scanner, "Enter request number to approve: ", 1, requests.size());
-        ProjectWithdrawalRequest request = requests.get(requestIndex - 1);
-
-        try {
-            if (RequestManager.approveWithdrawalRequest(request.getID())) {
-                System.out.println("Deregistration request approved successfully!");
-            } else {
-                System.out.println("Failed to approve deregistration request. You may not have permission.");
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to approve deregistration request: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Rejects a project deregistration request
-     */
-    private void rejectDeregistrationRequest(List<ProjectWithdrawalRequest> requests) {
-        if (requests.isEmpty()) {
-            System.out.println("No pending deregistration requests available to reject.");
-            return;
-        }
-
-        int requestIndex = InputHelper.getIntInput(scanner, "Enter request number to reject: ", 1, requests.size());
-        ProjectWithdrawalRequest request = requests.get(requestIndex - 1);
-
-        try {
-            if (RequestManager.rejectWithdrawalRequest(request.getID())) {
-                System.out.println("Deregistration request rejected successfully!");
-            } else {
-                System.out.println("Failed to reject deregistration request. You may not have permission.");
-            }
-        } catch (Exception e) {
-            System.out.println("Failed to reject deregistration request: " + e.getMessage());
-        }
     }
 
 

@@ -29,12 +29,10 @@ public class UserAdder {
     private static void addManager(Manager manager) throws ModelAlreadyExistsException {
         ManagerRepository.getInstance().add(manager);
     }
-
     /**
-     * Adds the specified supervisor to the database.
-     *
-     * @param supervisor the supervisor to be added
-     * @throws ModelAlreadyExistsException if the supervisor already exists in the database
+     * Adds the specified officer to the database.
+     * @param officer the officer to be added
+     * @throws ModelAlreadyExistsException if the Officer already exists in the database
      */
     private static void addOfficer(Officer officer) throws ModelAlreadyExistsException {
         OfficerRepository.getInstance().add(officer);

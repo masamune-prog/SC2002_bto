@@ -3,18 +3,16 @@ package boundary.mainpage;
 import boundary.account.ChangeAccountPassword;
 import boundary.account.Logout;
 import boundary.account.ViewUserProfile;
+import boundary.modelviewer.ProjectViewer;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 import controller.request.OfficerManager;
 import controller.request.RequestManager;
-import model.user.Applicant;
-import model.user.Officer;
-import model.user.User;
+import model.user.*;
 import model.project.Project;
 import model.request.OfficerApplicationRequest;
 import model.request.ProjectBookingRequest;
 import model.enquiry.Enquiry;
-import model.user.UserType;
 import utils.exception.ModelAlreadyExistsException;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
@@ -23,7 +21,9 @@ import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 import utils.ui.InputHelper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import static boundary.modelviewer.ProjectViewer.displayProjects;
@@ -33,7 +33,7 @@ import static boundary.modelviewer.ProjectViewer.displayProjects;
  */
 public class OfficerMainPage {
     private static final Scanner scanner = new Scanner(System.in);
-
+    private static Map<String, Integer> officerFilterNumbers = new HashMap<>();
     public static void officerMainPage(User user) {
         if (!(user instanceof Officer officer)) {
             throw new IllegalArgumentException("User is not an officer.");
@@ -70,8 +70,8 @@ public class OfficerMainPage {
                 case 7 -> handleBookingApprovals(officer);
                 case 8 -> listEnquiries();
                 case 9 -> replyToEnquiries();
-                case 10 -> displayProjects(ProjectManager.getAllProjects());
-                //case 11 -> changeProjectFilterSort();
+                case 10 -> viewAllProjects(officer);
+                case 11 -> changeProjectFilter(officer);
                 case 12 -> { Logout.logout(); return; }
                 default -> {
                     System.out.println("Invalid choice.");
@@ -90,7 +90,35 @@ public class OfficerMainPage {
             officerMainPage(officer);
         }
     }
+    private static void changeProjectFilter(Officer officer) throws PageBackException {
+        //get the filter numbers from the static map
+        int filterNumber = officerFilterNumbers.getOrDefault(officer.getID(), 0);
+        System.out.println("Filter number: " + filterNumber);
+        System.out.println("Please enter the filter number (0-3):");
+        System.out.println("0. No filter");
+        System.out.println("1. Filter by 2 Room Flat");
+        System.out.println("2. Filter by 3 Room Flat");
+        Scanner scanner = new Scanner(System.in);
+        int filterChoice = IntGetter.readInt();
+        if (filterChoice < 0 || filterChoice > 3) {
+            System.out.println("Invalid choice. Press Enter to go back.");
+            //prompt for new input
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+        if (filterChoice == 0) {
+            officerFilterNumbers.put(officer.getID(), filterChoice);
+            System.out.println("Filter removed.");
+        } else {
+            officerFilterNumbers.put(officer.getID(), filterChoice);
+            System.out.println("Filter set to " + filterChoice);
+        }
 
+    }
+    private static void viewAllProjects(Officer officer) throws PageBackException, ModelNotFoundException {
+        ProjectViewer.viewAllProjects(officerFilterNumbers.getOrDefault(officer.getID(), 0));
+
+    }
     private static void viewProfile(Officer officer) throws PageBackException {
         ViewUserProfile.viewUserProfilePage(officer);
         throw new PageBackException();

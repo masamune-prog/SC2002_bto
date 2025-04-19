@@ -3,13 +3,13 @@ package boundary.modelviewer;
 import controller.project.ProjectManager;
 import model.project.Project;
 import model.user.Applicant;
+import model.user.Manager;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
 import utils.ui.ChangePage;
 
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * This class provides methods to display project information in a formatted way.
@@ -41,14 +41,125 @@ public class ProjectViewer {
         new Scanner(System.in).nextLine();
         throw new PageBackException();
     }
+    public static void viewAvailableProjects(Applicant applicant, Integer filterNumber) throws PageBackException, ModelNotFoundException {
+        // 1 is filter 2 room flat, 2 is filter 3 room flat
+        ChangePage.changePage();
+        System.out.println("Available Projects for " + applicant.getName());
+        if(filterNumber == 0) {
+            System.out.println("No filter applied.");
+        } else if(filterNumber == 1) {
+            System.out.println("Filter: 2 Room Flat");
+        } else if(filterNumber == 2) {
+            System.out.println("Filter: 3 Room Flat");
+        } else {
+            System.out.println("Invalid filter number. No filter applied.");
 
-    /**
-     * Displays a list of projects in tabular format.
-     *
-     * @param projects the list of projects to display
-     */
+        }
+        List<Project> projects = ProjectManager.getAvailableProject(applicant.getNRIC());
+        List<Project> filteredProjects = new ArrayList<>();
+        if (projects.isEmpty()) {
+            System.out.println("No available projects found.");
+        } else if(filterNumber != 0) {
+            // Filter projects based on the filter number
+            for (Project project : projects) {
+                if(filterNumber == 1 && project.getTwoRoomFlatAvailable() > 0) {
+                    filteredProjects.add(project);
+                } else if (filterNumber == 2 && project.getThreeRoomFlatAvailable() > 0) {
+                    filteredProjects.add(project);
+                }
+            }
+            //System.out.println("Check if the project is there" + projects);
+            //if filter is 0 sort the project by the ProjectNames
+            if (projects.isEmpty()) {
+                System.out.println("No available projects found.");
+            } else {
+                displayProjects(filteredProjects);
+            }
+        } else {
+            // Sort projects by project title
+            //get the project title and sort it
+            List<String> projectTitles = new ArrayList<>();
+            for (Project project : projects) {
+                projectTitles.add(project.getProjectTitle());
+            }
+            Collections.sort(projectTitles);
+            List<Project> sortedProjects = new ArrayList<>();
+            for (String projectTitle : projectTitles) {
+                for (Project project : projects) {
+                    if (project.getProjectTitle().equals(projectTitle)) {
+                        sortedProjects.add(project);
+                    }
+                }
+            }
+            displayProjects(sortedProjects);
+        }
+
+        System.out.println("\nPress Enter to go back to main menu...");
+        new Scanner(System.in).nextLine();
+        throw new PageBackException();
+    }
+
+
+    public static void viewAllProjects(Integer filterNumber) throws PageBackException, ModelNotFoundException {
+        // 1 is filter 2 room flat, 2 is filter 3 room flat
+        ChangePage.changePage();
+        if(filterNumber == 0) {
+            System.out.println("No filter applied.");
+        } else if(filterNumber == 1) {
+            System.out.println("Filter: 2 Room Flat");
+        } else if(filterNumber == 2) {
+            System.out.println("Filter: 3 Room Flat");
+        } else {
+            System.out.println("Invalid filter number. No filter applied.");
+
+        }
+        List<Project> projects = ProjectManager.getAllProjects();
+        List<Project> filteredProjects = new ArrayList<>();
+        if (projects.isEmpty()) {
+            System.out.println("No available projects found.");
+        } else if(filterNumber != 0) {
+            // Filter projects based on the filter number
+            for (Project project : projects) {
+                if(filterNumber == 1 && project.getTwoRoomFlatAvailable() > 0) {
+                    filteredProjects.add(project);
+                } else if (filterNumber == 2 && project.getThreeRoomFlatAvailable() > 0) {
+                    filteredProjects.add(project);
+                }
+            }
+            //System.out.println("Check if the project is there" + projects);
+            //if filter is 0 sort the project by the ProjectNames
+            if (projects.isEmpty()) {
+                System.out.println("No available projects found.");
+            } else {
+                displayProjects(filteredProjects);
+            }
+        } else {
+            // Sort projects by project title
+            //get the project title and sort it
+            List<String> projectTitles = new ArrayList<>();
+            for (Project project : projects) {
+                projectTitles.add(project.getProjectTitle());
+            }
+            Collections.sort(projectTitles);
+            List<Project> sortedProjects = new ArrayList<>();
+            for (String projectTitle : projectTitles) {
+                for (Project project : projects) {
+                    if (project.getProjectTitle().equals(projectTitle)) {
+                        sortedProjects.add(project);
+                    }
+                }
+            }
+            displayProjects(sortedProjects);
+        }
+
+
+    }
     public static void displayProjects(List<Project> projects) {
         // Determine the maximum width for each column dynamically
+        if(projects.isEmpty()) {
+            System.out.println("No projects to display.");
+            return;
+        }
         int idWidth = Math.max(8, projects.stream().mapToInt(p -> p.getID().length()).max().orElse(8));
         int titleWidth = Math.max(28, projects.stream().mapToInt(p -> p.getProjectTitle().length()).max().orElse(28));
         int dateWidth = 12; // Fixed width for dates

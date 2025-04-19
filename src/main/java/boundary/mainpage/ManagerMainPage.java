@@ -2,6 +2,7 @@ package boundary.mainpage;
 
 import boundary.account.Logout;
 import boundary.modelviewer.ListPrinter;
+import boundary.modelviewer.ProjectViewer;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
 //import controller.report.ApplicantReportManager;
@@ -16,6 +17,7 @@ import model.request.OfficerApplicationRequest;
 import model.request.ProjectWithdrawalRequest;
 import model.request.Request;
 import model.project.RoomType;
+import model.user.Applicant;
 import model.user.Manager;
 import model.user.MaritalStatus;
 import model.user.User;
@@ -24,13 +26,12 @@ import repository.project.ProjectRepository;
 import repository.request.RequestRepository;
 import utils.exception.ModelNotFoundException;
 import utils.exception.PageBackException;
+import utils.iocontrol.IntGetter;
 import utils.ui.InputHelper;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Comparator;
 
 public class ManagerMainPage {
     private final Manager manager;
@@ -41,7 +42,7 @@ public class ManagerMainPage {
     private final RequestRepository requestRepository;
     private final EnquiryRepository enquiryRepository;
     private final ListPrinter<Project> projectPrinter;  // persistent filter+sort for projects
-
+    private static Map<String, Integer> managerFilterNumbers = new HashMap<>();
     public ManagerMainPage(User user) {
         if (!(user instanceof Manager)) {
             throw new IllegalArgumentException("User must be a Manager");
@@ -81,10 +82,11 @@ public class ManagerMainPage {
             System.out.println("12. Approve/Reject Project Withdrawal Requests");
             System.out.println("13. See Filtered Projects");
             System.out.println("14. See Reports");
+            System.out.println("15. Change Project Filter/Sort");
             System.out.println("15. Logout");
             int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 1, 15);
             switch (choice) {
-                case 1 -> displayProjects(ProjectManager.getAllProjects());
+                case 1 -> viewAllProjects();
                 case 2 -> createNewProject();
                 case 3 -> editProject();
                 case 4 -> deleteProject();
@@ -98,11 +100,18 @@ public class ManagerMainPage {
                 case 12 -> approveRejectWithdrawalRequest();
                 case 13 -> filterProjects(manager);
                 case 14 -> generateApplicantReport();
-                case 15 -> { Logout.logout(); return; }
+                case 15 -> changeProjectFilter(manager);
+                case 16 -> { Logout.logout(); return; }
                 default -> System.out.println("Invalid choice.");
             }
             System.out.println("\nPress enter to continue..."); scanner.nextLine();
         }
+
+
+    }
+    private void viewAllProjects() throws PageBackException, ModelNotFoundException {
+        ProjectViewer.viewAllProjects(managerFilterNumbers.getOrDefault(manager.getID(), 0));
+
     }
     private void generateApplicantReport() {
         System.out.println("\n=== Generate Applicant Report ===");
@@ -690,35 +699,32 @@ public class ManagerMainPage {
     }
 
 
-    private void changeProjectFilter() {
-        System.out.println("\n=== Change Project Filter ===");
-        System.out.println("1. Filter by Neighborhood");
-        System.out.println("2. Filter by Visibility");
-        System.out.println("3. Clear Filter");
-        System.out.println("0. Back to Main Menu");
-        int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 0, 3);
-
-        switch (choice) {
-            case 1 -> {
-                String neighborhood = InputHelper.getStringInput(scanner, "Enter neighborhood to filter: ");
-                projectPrinter.setFilter(project -> project.getNeighbourhood().equalsIgnoreCase(neighborhood));
-                System.out.println("Neighborhood filter applied.");
-            }
-            case 2 -> {
-                boolean visible = InputHelper.getBooleanInput(scanner, "Filter by visibility (yes/no): ");
-                projectPrinter.setFilter(project -> project.getVisibility() == visible);
-                System.out.println("Visibility filter applied.");
-            }
-            case 3 -> {
-                projectPrinter.clearFilter();
-                System.out.println("All filters cleared.");
-            }
-            case 0 -> {
-                // back to menu
-            }
-            default -> System.out.println("Invalid choice.");
+    private static void changeProjectFilter(Manager manager) throws PageBackException {
+        //get the filter numbers from the static map
+        int filterNumber = managerFilterNumbers.getOrDefault(manager.getID(), 0);
+        System.out.println("Filter number: " + filterNumber);
+        System.out.println("Please enter the filter number (0-3):");
+        System.out.println("0. No filter");
+        System.out.println("1. Filter by 2 Room Flat");
+        System.out.println("2. Filter by 3 Room Flat");
+        Scanner scanner = new Scanner(System.in);
+        int filterChoice = IntGetter.readInt();
+        if (filterChoice < 0 || filterChoice > 3) {
+            System.out.println("Invalid choice. Press Enter to go back.");
+            //prompt for new input
+            scanner.nextLine();
+            throw new PageBackException();
         }
+        if (filterChoice == 0) {
+            managerFilterNumbers.put(manager.getID(), filterChoice);
+            System.out.println("Filter removed.");
+        } else {
+            managerFilterNumbers.put(manager.getID(), filterChoice);
+            System.out.println("Filter set to " + filterChoice);
+        }
+
     }
+
 
 
     /**

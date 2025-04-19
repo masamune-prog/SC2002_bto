@@ -21,11 +21,13 @@ import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ApplicantMainPage {
-
+    private static Map<String, Integer> applicantFilterNumbers = new HashMap<>(); // Static map to store persistent numbers
     public static void applicantMainPage(User user) {
         if (user instanceof Applicant applicant) {
             ChangePage.changePage();
@@ -63,7 +65,7 @@ public class ApplicantMainPage {
                 switch (choice) {
                     case 1 -> viewProfile(applicant);
                     case 2 -> changePassword(applicant);
-                    case 3 -> viewAvailableProjects(applicant);
+                    case 3 -> viewAvailableProjects(applicant, applicantFilterNumbers.getOrDefault(applicant.getID(), 0));
                     case 4 -> viewApplicationStatus(applicant.getID());
                     case 5 -> applyForProject(applicant);
                     case 6 -> withdrawApplication(applicant);
@@ -102,13 +104,13 @@ public class ApplicantMainPage {
         ChangeAccountPassword.changePassword(UserType.APPLICANT, applicant.getID());
     }
 
-    private static void viewAvailableProjects(Applicant applicant) throws PageBackException, ModelNotFoundException {
+    private static void viewAvailableProjects(Applicant applicant,Integer filterNumber) throws PageBackException, ModelNotFoundException {
         if (applicant.getApplicantStatus() != ApplicantStatus.NO_REGISTRATION) {
             System.out.println("You already have an active application or registration.");
             System.out.println("Press Enter to go back.");
             throw new PageBackException();
         }
-        ProjectViewer.viewAvailableProjects(applicant);
+        ProjectViewer.viewAvailableProjects(applicant,filterNumber);
     }
 
     private static void viewApplicationStatus(String applicantID) throws PageBackException, ModelNotFoundException {
@@ -397,7 +399,32 @@ public class ApplicantMainPage {
     }
 
     private static void changeProjectFilter(Applicant applicant) throws PageBackException {
-        //FilterManager.changeProjectFilter(applicant);
+        //get the filter numbers from the static map
+        int filterNumber = applicantFilterNumbers.getOrDefault(applicant.getID(), 0);
+        System.out.println("Filter number: " + filterNumber);
+        System.out.println("Please enter the filter number (0-3):");
+        System.out.println("0. No filter");
+        System.out.println("1. Filter by 2 Room Flat");
+        System.out.println("2. Filter by 3 Room Flat");
+        Scanner scanner = new Scanner(System.in);
+        int filterChoice = IntGetter.readInt();
+        if (filterChoice < 0 || filterChoice > 3) {
+            System.out.println("Invalid choice. Press Enter to go back.");
+            //prompt for new input
+            scanner.nextLine();
+            throw new PageBackException();
+        }
+        if (filterChoice == 0) {
+            applicantFilterNumbers.put(applicant.getID(), filterChoice);
+            System.out.println("Filter removed.");
+        } else {
+            applicantFilterNumbers.put(applicant.getID(), filterChoice);
+            System.out.println("Filter set to " + filterChoice);
+        }
+        System.out.println("Press Enter to go back.");
+        scanner.nextLine();
+        throw new PageBackException();
+
     }
 
     private static void logout() throws PageBackException {

@@ -83,8 +83,8 @@ public class ManagerMainPage {
             System.out.println("13. See Filtered Projects");
             System.out.println("14. See Reports");
             System.out.println("15. Change Project Filter/Sort");
-            System.out.println("15. Logout");
-            int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 1, 15);
+            System.out.println("16. Logout");
+            int choice = InputHelper.getIntInput(scanner, "Enter your choice: ", 1, 16);
             switch (choice) {
                 case 1 -> viewAllProjects();
                 case 2 -> createNewProject();

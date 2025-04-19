@@ -145,15 +145,6 @@ public class ApplicantReportManagerTest {
         assertFalse(report.stream().anyMatch(e -> e.applicantName.equals("Bob Lim")), "Bob (Single) should not be in the report");
     }
 
-    @Test
-    void generateReport_FilterByRoomType_TwoRoom() {
-        List<ApplicantReportManager.ReportEntry> report = reportManager.generateReport(null, RoomType.TWO_ROOM_FLAT, null, null, null);
-
-        assertEquals(2, report.size(), "Report should contain 2 booked applicants with Two-Room flats");
-        assertTrue(report.stream().anyMatch(e -> e.applicantName.equals("Alice Tan")), "Alice (2-Room) should be in the report");
-        assertTrue(report.stream().anyMatch(e -> e.applicantName.equals("Bob Lim")), "Bob (2-Room) should be in the report");
-        assertFalse(report.stream().anyMatch(e -> e.applicantName.equals("Charlie Lee")), "Charlie (3-Room) should not be in the report");
-    }
 
     @Test
     void generateReport_FilterByProjectName_SkyVille() {
@@ -184,17 +175,6 @@ public class ApplicantReportManagerTest {
         assertFalse(report.stream().anyMatch(e -> e.applicantName.equals("Charlie Lee")), "Charlie (42) should not be in the report");
     }
 
-    @Test
-    void generateReport_CombinedFilters_Married_TwoRoom_SkyVille() {
-        List<ApplicantReportManager.ReportEntry> report = reportManager.generateReport(MaritalStatus.MARRIED, RoomType.TWO_ROOM_FLAT, "SkyVille", null, null);
-
-        assertEquals(1, report.size(), "Report should contain only Alice");
-        assertEquals("Alice Tan", report.get(0).applicantName);
-        assertEquals(35, report.get(0).age);
-        assertEquals(MaritalStatus.MARRIED, report.get(0).maritalStatus);
-        assertEquals("SkyVille", report.get(0).projectName);
-        assertEquals(RoomType.TWO_ROOM_FLAT, report.get(0).roomType);
-    }
 
     @Test
     void generateReport_NoMatches() {

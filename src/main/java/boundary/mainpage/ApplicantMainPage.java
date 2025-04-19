@@ -297,7 +297,9 @@ public class ApplicantMainPage {
             for (Enquiry enquiry : enquiries) {
                 System.out.println("Enquiry ID: " + enquiry.getID());
                 System.out.println("Title: " + enquiry.getEnquiryTitle());
-                System.out.println("Description: " + enquiry.getQuestion());
+                System.out.println("Description: " + enquiry.getContent());
+                System.out.println("Creator ID: " + enquiry.getCreatorID());
+                System.out.println("Answer: " + enquiry.getAnswer());
                 System.out.println("Status: " + (enquiry.getAnswered() ? "Answered" : "Unanswered"));
                 System.out.println();
             }

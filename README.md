@@ -8,7 +8,7 @@ To run this project, import it as a maven project. For best results, run
 mvn clean 
 ```
 
-then compile all classes, using either your IDE
+then compile all classes, using either your IDE(Recommended for nicer visuals)
 
 or run
 
@@ -21,7 +21,6 @@ After modifying the txt files, run the following command to update the
 
 ```bash
 mvn clean compile
-mvn package -DskipTests
 mvn install -DskipTests
 ```
 

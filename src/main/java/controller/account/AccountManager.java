@@ -20,9 +20,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A class that manages the account of a user
+ * Manages user accounts, including login, registration, password changes,
+ * and loading user data.
  */
 public class AccountManager {
+    /**
+     * Attempts to log in a user with the given credentials.
+     *
+     * @param userType The type of the user trying to log in.
+     * @param userID   The ID of the user.
+     * @param password The password provided by the user.
+     * @return The authenticated User object.
+     * @throws PasswordIncorrectException If the provided password does not match the stored password.
+     * @throws ModelNotFoundException     If no user with the given ID and type exists.
+     */
     public static User login(UserType userType, String userID, String password)
             throws PasswordIncorrectException, ModelNotFoundException {
         User user = UserFinder.findUser(userID, userType);
@@ -33,6 +44,16 @@ public class AccountManager {
         }
     }
 
+    /**
+     * Changes the password for a specified user.
+     *
+     * @param userType    The type of the user.
+     * @param userID      The ID of the user.
+     * @param oldPassword The user's current password.
+     * @param newPassword The desired new password.
+     * @throws PasswordIncorrectException If the provided old password does not match.
+     * @throws ModelNotFoundException     If no user with the given ID and type exists.
+     */
     public static void changePassword(UserType userType, String userID, String oldPassword, String newPassword)
             throws PasswordIncorrectException, ModelNotFoundException {
         User user = UserFinder.findUser(userID, userType);
@@ -40,6 +61,12 @@ public class AccountManager {
         UserUpdater.updateUser(user);
     }
 
+    /**
+     * Retrieves a list of all users (Applicants, Managers, Officers) matching the given NRIC.
+     *
+     * @param userNRIC The NRIC to search for.
+     * @return A list of User objects matching the NRIC. Returns an empty list if no matches are found.
+     */
     public static List<User> getUsersByNRIC(String userNRIC) {
         List<Applicant> applicantList = ApplicantRepository.getInstance().findByRules(
                 applicant -> applicant.checkNRIC(userNRIC)
@@ -56,7 +83,21 @@ public class AccountManager {
         userList.addAll(officerList);
         return userList;
     }
-    //Use the userFactory to create a user and add it to the repository
+
+    /**
+     * Registers a new user in the system with full details including password.
+     *
+     * @param userType      The type of user to register.
+     * @param userNRIC      The NRIC of the new user (used as ID).
+     * @param password      The password for the new user.
+     * @param name          The name of the new user.
+     * @param age           The age of the new user.
+     * @param maritalStatus The marital status of the new user.
+     * @param projectID     The project ID associated with the user (if applicable).
+     * @param roomType      The room type associated with the user (if applicable).
+     * @return The newly created User object.
+     * @throws ModelAlreadyExistsException If a user with the same NRIC (ID) already exists.
+     */
     public static User register(UserType userType, String userNRIC, String password, String name,
                                 int age, MaritalStatus maritalStatus, String projectID, RoomType roomType)
             throws ModelAlreadyExistsException {
@@ -64,7 +105,21 @@ public class AccountManager {
         UserAdder.addUser(user);
         return user;
     }
-    //when the password is not needed, use this method
+
+    /**
+     * Registers a new user in the system with a default password "password".
+     * Use this when the specific password is not immediately required or will be set later.
+     *
+     * @param userType      The type of user to register.
+     * @param userNRIC      The NRIC of the new user (used as ID).
+     * @param name          The name of the new user.
+     * @param age           The age of the new user.
+     * @param maritalStatus The marital status of the new user.
+     * @param projectID     The project ID associated with the user (if applicable).
+     * @param roomType      The room type associated with the user (if applicable).
+     * @return The newly created User object.
+     * @throws ModelAlreadyExistsException If a user with the same NRIC (ID) already exists.
+     */
     public static User register(UserType userType, String userNRIC, String name,
                                 Integer age, MaritalStatus maritalStatus, String projectID, RoomType roomType)
             throws ModelAlreadyExistsException {
@@ -84,11 +139,8 @@ public class AccountManager {
             MaritalStatus maritalStatus = row.get(3).equals("Single") ? MaritalStatus.SINGLE : MaritalStatus.MARRIED;
 
             String password = row.get(4);
-            //System.out.println("Password: " + password);
-            //String hashedPassword = PasswordHashManager.hashPassword(password);
-            //System.out.println("Password: " + hashedPassword);
             try {
-                register(UserType.APPLICANT,applicantNRIC,password,name,Age,maritalStatus, "", RoomType.NONE);
+                register(UserType.APPLICANT, applicantNRIC, password, name, Age, maritalStatus, "", RoomType.NONE);
             } catch (ModelAlreadyExistsException e) {
                 e.printStackTrace();
             }
@@ -103,9 +155,8 @@ public class AccountManager {
             Integer Age = Integer.parseInt(row.get(2));
             MaritalStatus maritalStatus = row.get(3).equals("Single") ? MaritalStatus.SINGLE : MaritalStatus.MARRIED;
             String password = row.get(4);
-            //String hashedPassword = PasswordHashManager.hashPassword(password);
             try {
-                register(UserType.MANAGER,managerNRIC,password,name,Age,maritalStatus, "", RoomType.NONE);
+                register(UserType.MANAGER, managerNRIC, password, name, Age, maritalStatus, "", RoomType.NONE);
             } catch (ModelAlreadyExistsException e) {
                 e.printStackTrace();
             }
@@ -121,25 +172,42 @@ public class AccountManager {
             MaritalStatus maritalStatus = row.get(3).equals("Single") ? MaritalStatus.SINGLE : MaritalStatus.MARRIED;
             String password = row.get(4);
             try {
-                register(UserType.OFFICER,applicantNRIC,password,name,Age,maritalStatus, "", RoomType.NONE);
+                register(UserType.OFFICER, applicantNRIC, password, name, Age, maritalStatus, "", RoomType.NONE);
             } catch (ModelAlreadyExistsException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    /**
+     * Loads initial user data from CSV files for Applicants, Managers, and Officers.
+     * This is typically called on the first start of the application.
+     */
     public static void loadUsers() {
         loadApplicants();
         loadManagers();
         loadOfficers();
     }
 
+    /**
+     * Checks if all user repositories (Applicant, Manager, Officer) are empty.
+     *
+     * @return true if all repositories are empty, false otherwise.
+     */
     public static boolean repositoryIsEmpty() {
         return ApplicantRepository.getInstance().isEmpty() &&
                 ManagerRepository.getInstance().isEmpty() &&
                 OfficerRepository.getInstance().isEmpty();
     }
 
+    /**
+     * Retrieves a specific user by their type and ID.
+     *
+     * @param userType The type of the user to retrieve.
+     * @param ID       The ID of the user to retrieve.
+     * @return The User object matching the type and ID.
+     * @throws ModelNotFoundException If no user with the specified type and ID is found.
+     */
     public static User getByDomainAndID(UserType userType, String ID) throws ModelNotFoundException {
         return switch (userType) {
             case APPLICANT -> ApplicantRepository.getInstance().getByID(ID);

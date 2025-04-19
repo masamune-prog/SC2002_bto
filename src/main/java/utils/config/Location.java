@@ -1,12 +1,28 @@
 package utils.config;
 
+import java.nio.file.Paths;
+
 /**
- * This class contains the location of the resources.
+ * This class determines the location of the resources dynamically.
+ * Note: Loading resources via the classpath is generally preferred over this approach.
  */
 public class Location {
     /**
-     * The location of the resources.
-     * If the resources are in the same directory as the program, this should be ".".
+     * Dynamically determines the location of the resources based on the project's
+     * current working directory. Assumes the standard Maven project structure.
+     * This approach might be less reliable than classpath loading depending on execution context.
      */
-    public static final String RESOURCE_LOCATION = "C:\\Users\\G ZR\\OneDrive - Nanyang Technological University\\NTU Material\\Y2S2\\SC2002\\Project\\SC2002_BTO_EXP\\src\\main\\resources"; // ""D:\\NTU\\Y1S2\\SC2002\\FYPMS";
+    public static final String RESOURCE_LOCATION = determineResourceLocation();
+
+    /**
+     * Helper method to determine the resource location path.
+     * @return The calculated path to the src/main/resources directory.
+     */
+    private static String determineResourceLocation() {
+        // Get the current working directory (usually the project root when run from IDE/Maven)
+        String projectRoot = System.getProperty("user.dir");
+        // Construct the path to the resources folder relative to the project root
+        // Using Paths.get().toString() helps normalize path separators (e.g., '/' vs '\')
+        return Paths.get(projectRoot, "src", "main", "resources").toString();
+    }
 }

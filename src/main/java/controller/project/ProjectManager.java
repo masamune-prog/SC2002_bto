@@ -279,6 +279,10 @@ public class ProjectManager {
         //get all projects
         List<Project> allProjects = ProjectRepository.getInstance().getList();
         Applicant applicant = ApplicantManager.getByNRIC(applicantNRIC);
+        //if applicant is SINGLE and Under 35, return empty list
+        if (applicant.getMaritalStatus() == MaritalStatus.SINGLE && applicant.getAge() < 35) {
+            return new ArrayList<Project>();
+        }
         //filter projects that are available
         List<Project> availableProjects = allProjects.stream()
                 .filter(project -> project.getVisibility() == Boolean.TRUE && project.getApplicationOpeningDate().isBefore(LocalDate.now()) && project.getApplicationClosingDate().isAfter(LocalDate.now()))

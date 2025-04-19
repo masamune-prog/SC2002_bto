@@ -389,6 +389,10 @@ public class ApplicantMainPage {
         } else {
             request.printRequest();
         }
+        System.out.println("Press Enter to go back.");
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
+        throw new PageBackException();
 
     }
 

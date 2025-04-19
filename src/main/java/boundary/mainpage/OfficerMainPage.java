@@ -6,6 +6,7 @@ import boundary.account.ViewUserProfile;
 import boundary.modelviewer.ProjectViewer;
 import controller.enquiry.EnquiryManager;
 import controller.project.ProjectManager;
+import controller.request.ApplicantManager;
 import controller.request.OfficerManager;
 import controller.request.RequestManager;
 import model.user.*;
@@ -168,6 +169,12 @@ public class OfficerMainPage {
         }
         if (project.getOfficerIDs().size() >= 10) {
             System.out.println("This project already has 10 officers.");
+            throw new PageBackException();
+        }
+        // Check officer is not a applicant for this project
+        Applicant applicant = ApplicantManager.getByNRIC(officer.getID());
+        if (applicant != null && applicant.getProjectID().equals(projectID)) {
+            System.out.println("You are already an applicant for this project.");
             throw new PageBackException();
         }
         String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);

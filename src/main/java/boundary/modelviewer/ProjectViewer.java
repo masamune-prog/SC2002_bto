@@ -166,32 +166,59 @@ public class ProjectViewer {
         int roomWidth = Math.max(26, projects.stream()
                 .mapToInt(p -> String.format("$%.2f, %d", p.getTwoRoomFlatPrice(), p.getTwoRoomFlatAvailable()).length())
                 .max().orElse(26));
+        int officerWidth = 95; // Width for officer IDs (9 chars per ID + commas)
 
         // Print table header
-        String headerFormat = String.format("┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
-                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth);
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
+        String headerFormat = String.format("┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
+                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth);
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
 
-        String columnFormat = String.format("│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
-                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth);
+        String columnFormat = String.format("│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
+                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth);
         System.out.printf(columnFormat + "\n",
-                "ID", "Title", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)");
+                "ID", "Title", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)", "Officers");
 
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
 
         // Print each project
         for (Project project : projects) {
+            // Format all officer IDs without truncation
+            String officersDisplay = formatAllOfficerIDs(project.getOfficerIDs());
+
             System.out.printf(columnFormat + "\n",
                     project.getID(),
                     project.getProjectTitle(),
                     project.getApplicationOpeningDate().format(DATE_FORMATTER),
                     project.getApplicationClosingDate().format(DATE_FORMATTER),
                     String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), project.getTwoRoomFlatAvailable()),
-                    String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), project.getThreeRoomFlatAvailable()));
+                    String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), project.getThreeRoomFlatAvailable()),
+                    officersDisplay);
         }
 
         // Print table footer
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "").replace(" ", "─"));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
+    }
+
+    /**
+     * Format all officer IDs without truncation
+     * @param officerIDs List of officer IDs
+     * @return Formatted string of all officer IDs
+     */
+    private static String formatAllOfficerIDs(List<String> officerIDs) {
+        if (officerIDs == null || officerIDs.isEmpty()) {
+            return "None";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < officerIDs.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(officerIDs.get(i));
+        }
+
+        return sb.toString();
     }
 
     /**

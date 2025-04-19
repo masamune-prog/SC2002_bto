@@ -161,6 +161,15 @@ public class OfficerMainPage {
             System.out.println("Project not found.");
             throw new PageBackException();
         }
+        // Check if the officer is already assigned to this project or there are more than 10 officers
+        if (project.getOfficerIDs().contains(officer.getID())) {
+            System.out.println("You are already assigned to this project.");
+            throw new PageBackException();
+        }
+        if (project.getOfficerIDs().size() >= 10) {
+            System.out.println("This project already has 10 officers.");
+            throw new PageBackException();
+        }
         String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);
         System.out.println("Application submitted successfully. Request ID: " + requestID);
         throw new PageBackException();

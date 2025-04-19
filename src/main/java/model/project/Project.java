@@ -101,7 +101,7 @@ public class Project implements Model, Displayable {
     public void setApplicationClosingDate(LocalDate applicationClosingDate) {
         this.applicationClosingDate = applicationClosingDate;
     }
-    public List<String> getOfficerIDs() {
+        public List<String> getOfficerIDs() {
         return officerIDs;
     }
     public String getManagerID() {

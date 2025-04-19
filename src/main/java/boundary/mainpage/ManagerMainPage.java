@@ -501,10 +501,9 @@ public class ManagerMainPage {
         System.out.println("1. Location");
         System.out.println("2. Price Range");
         System.out.println("3. Number of Units");
-        System.out.println("4. My Projects");
-        int filterChoice = InputHelper.getIntInput(scanner, "Enter your choice: ", 1, 4);
+        int filterChoice = InputHelper.getIntInput(scanner, "Enter your choice: ", 1, 3);
 
-        List<Project> allProjects = projectManager.getAllProjects();
+        List<Project> allProjects = ProjectManager.getAllProjectsByManager(manager.getNRIC());
         List<Project> filteredProjects;
         switch (filterChoice) {
             case 1 -> {

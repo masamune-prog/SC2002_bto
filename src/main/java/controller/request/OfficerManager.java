@@ -38,12 +38,14 @@ public class OfficerManager {
     //get projects that the officer is in charge of
     public static List<String> getProjectsByOfficerID(String officerID) {
         List<Project> projects = ProjectRepository.getInstance().getAll();
+        //create empty list of projects
+        List<String> projectIDs = new java.util.ArrayList<>();
         for (Project project : projects) {
             if (project.getOfficerIDs().contains(officerID)) {
-                return project.getOfficerIDs();
+                projectIDs.add(project.getID());
             }
         }
-        return null;
+        return projectIDs;
     }
     public static List<OfficerApplicationRequest> getOfficerApplicationsByOfficerID(String officerID) {
         List<Request> requests = RequestRepository.getInstance().getAll();

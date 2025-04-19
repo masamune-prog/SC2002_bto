@@ -393,7 +393,9 @@ public class ProjectManager {
     public static List<Project> getAllProjects() {
         return ProjectRepository.getInstance().getList();
     }
-
+    public static List<Project> getAllProjectsByManager(String managerNRIC) {
+        return ProjectRepository.getInstance().findByRules(p -> p.getManagerNRIC().equals(managerNRIC));
+    }
     /**
      * Deletes a project from the repository.
      *

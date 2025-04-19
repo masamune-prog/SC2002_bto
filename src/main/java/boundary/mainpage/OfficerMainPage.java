@@ -9,6 +9,8 @@ import controller.project.ProjectManager;
 import controller.request.ApplicantManager;
 import controller.request.OfficerManager;
 import controller.request.RequestManager;
+import model.request.ProjectApplicationRequest;
+import model.request.Request;
 import model.user.*;
 import model.project.Project;
 import model.request.OfficerApplicationRequest;
@@ -22,10 +24,7 @@ import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 import utils.ui.InputHelper;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static boundary.modelviewer.ProjectViewer.displayProjects;
 
@@ -172,9 +171,18 @@ public class OfficerMainPage {
             throw new PageBackException();
         }
         // Check officer is not a applicant for this project
-        Applicant applicant = ApplicantManager.getByNRIC(officer.getID());
-        if (applicant != null && applicant.getProjectID().equals(projectID)) {
-            System.out.println("You are already an applicant for this project.");
+        Request requests = RequestManager.getApplicationRequestByApplicant(officer.getID());
+        Request getBookingRequests = RequestManager.getBookingRequestByApplicant(officer.getID());
+        if(requests == null || getBookingRequests == null) {
+            System.out.println("No application requests found.");
+            throw new PageBackException();
+        }
+        if(requests.getProjectID().equals(project.getID())) {
+            System.out.println("You have already applied for this project.");
+            throw new PageBackException();
+        }
+        if(getBookingRequests.getProjectID().equals(project.getID())) {
+            System.out.println("You have already applied for this project.");
             throw new PageBackException();
         }
         String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);

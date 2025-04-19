@@ -174,6 +174,7 @@ public class ApplicantMainPage {
         String confirm = scanner.nextLine().toUpperCase();
         if (confirm.equals("Y")) {
             try {
+
                 String requestID = ApplicantManager.createProjectApplicationRequest(
                         applicant.getID(), selectedProject.getID(), roomType);
                 System.out.println("Application submitted successfully. Request ID: " + requestID);

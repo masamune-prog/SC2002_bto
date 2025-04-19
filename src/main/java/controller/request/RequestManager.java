@@ -368,6 +368,17 @@ public class RequestManager {
         }
         return null;
     }
+    public static Request getApplicationRequestByApplicant(String applicantID) throws ModelNotFoundException {
+        List<Request> requestList = RequestRepository.getInstance().getAll();
+        for (Request request : requestList) {
+            if (request instanceof ProjectApplicationRequest projectApplicationRequest) {
+                if (projectApplicationRequest.getApplicantID().equals(applicantID)) {
+                    return request;
+                }
+            }
+        }
+        return null;
+    }
     public static String createOfficerApplicationRequest(String officerID, String projectID) throws ModelNotFoundException, ModelAlreadyExistsException {
         // Check if the officer is already an officer in the project
         Project project = ProjectManager.getByID(projectID);

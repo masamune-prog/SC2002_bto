@@ -23,10 +23,10 @@ public class ViewUserProfile {
 
         if (user instanceof Applicant) {
             Applicant applicant = (Applicant) user;
-            System.out.println("┌-------------------------------------------------------------------------------┐");
+            System.out.println("┌─────────────────┬──────────────────────┬─────┬─────────────────┬──────────────────────┬────────────────┬────────────┐");
             System.out.printf("| %-15s | %-20s | %-3s | %-15s | %-20s | %-15s | %-10s |%n",
                     "Applicant NRIC", "Name", "Age", "Marital Status", "Project ID", "Status", "RoomType");
-            System.out.println("|-----------------|----------------------|-----|-----------------|----------------------|----------------|------------|");
+            System.out.println("├─────────────────┼──────────────────────┼─────┼─────────────────┼──────────────────────┼────────────────┼────────────┤");
             System.out.printf("| %-15s | %-20s | %-3d | %-15s | %-20s | %-15s | %-10s |%n",
                     applicant.getNRIC(),
                     applicant.getName(),
@@ -35,16 +35,16 @@ public class ViewUserProfile {
                     applicant.getProjectID(),
                     applicant.getApplicantStatus().name(),
                     applicant.getRoomType().name());
-            System.out.println("└-------------------------------------------------------------------------------┘");
+            System.out.println("└─────────────────┴──────────────────────┴─────┴─────────────────┴──────────────────────┴────────────────┴────────────┘");
         } else {
             // Generic user view: only Name and NRIC
-            System.out.println("┌---------------------------------------------┐");
+            System.out.println("┌─────────────────┬──────────────────────┐");
             System.out.printf("| %-15s | %-20s |%n", "Name", "NRIC");
-            System.out.println("|-----------------|------------------------|");
+            System.out.println("├─────────────────┼──────────────────────┤");
             System.out.printf("| %-15s | %-20s |%n",
                     user.getName(),
                     user.getNRIC());
-            System.out.println("└---------------------------------------------┘");
+            System.out.println("└─────────────────┴──────────────────────┘");
         }
     }
 

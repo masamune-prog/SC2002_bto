@@ -108,8 +108,7 @@ public class ApplicantMainPage {
             System.out.println("Press Enter to go back.");
             throw new PageBackException();
         }
-        List<Project> projects = ProjectManager.getAvailableProject(applicant.getNRIC());
-        ProjectViewer.displayProjects(projects);
+        ProjectViewer.viewAvailableProjects(applicant);
     }
 
     private static void viewApplicationStatus(String applicantID) throws PageBackException, ModelNotFoundException {

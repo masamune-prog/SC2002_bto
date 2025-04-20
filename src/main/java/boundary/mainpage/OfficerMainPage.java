@@ -140,9 +140,7 @@ public class OfficerMainPage {
             System.out.println("No projects in charge.");
             throw new PageBackException();
         }
-        for (Project p : list) {
-            System.out.println(p.getDisplayableString());
-        }
+        ProjectViewer.displayProjects(list); // fix view
         throw new PageBackException();
     }
 

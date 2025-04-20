@@ -170,6 +170,20 @@ public class OfficerMainPage {
             System.out.println("This project already has 10 officers.");
             throw new PageBackException();
         }
+        
+        // Check officer is not a applicant for this project
+        Request requests = RequestManager.getApplicationRequestByApplicant(officer.getID());
+        Request getBookingRequests = RequestManager.getBookingRequestByApplicant(officer.getID());
+        
+        if(requests != null && requests.getProjectID().equals(project.getID())) {
+            System.out.println("You have an application for this project.");
+            throw new PageBackException();
+        }
+        if(getBookingRequests != null && getBookingRequests.getProjectID().equals(project.getID())) {
+            System.out.println("You have a booking for this project.");
+            throw new PageBackException();
+        }
+        
         //check if the date overlaps with any of officer current projects
         List<Project> projects = ProjectManager.getAllProjects();
         for (Project p : projects) {
@@ -180,23 +194,10 @@ public class OfficerMainPage {
                 }
             }
         }
-        // Check officer is not a applicant for this project
-        Request requests = RequestManager.getApplicationRequestByApplicant(officer.getID());
-        Request getBookingRequests = RequestManager.getBookingRequestByApplicant(officer.getID());
-        if(requests == null || getBookingRequests == null) {
-            String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);
-            System.out.println("Application submitted successfully. Request ID: " + requestID);
-            throw new PageBackException();
-        }
-        if(requests.getProjectID().equals(project.getID())) {
-            System.out.println("You have already applied for this project.");
-            throw new PageBackException();
-        }
-        if(getBookingRequests.getProjectID().equals(project.getID())) {
-            System.out.println("You have already applied for this project.");
-            throw new PageBackException();
-        }
-
+        
+        String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);
+        System.out.println("Application submitted successfully. Request ID: " + requestID);
+        throw new PageBackException();
 
     }
 

@@ -201,7 +201,7 @@ public class RequestManager {
         // change the status of the applicant to Not Registered
         ApplicantManager.updateApplicantStatus(applicantID, ApplicantStatus.NO_REGISTRATION);
         // remove the project from the applicant's list
-        ApplicantManager.updateApplicantProjectID(applicantID, "");
+        ApplicantManager.updateApplicantProjectID(applicantID, null);
         // remove the room type from the applicant's list
         ApplicantManager.updateApplicantRoomType(applicantID, RoomType.NONE);
         //find all requests that are pending and have the same projectID and applicantID and set to rejected

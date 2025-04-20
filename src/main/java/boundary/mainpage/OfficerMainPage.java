@@ -170,6 +170,16 @@ public class OfficerMainPage {
             System.out.println("This project already has 10 officers.");
             throw new PageBackException();
         }
+        //check if the date overlaps with any of officer current projects
+        List<Project> projects = ProjectManager.getAllProjects();
+        for (Project p : projects) {
+            if (p.getOfficerIDs().contains(officer.getID()) && p.getID() != projectID) {
+                if (p.getApplicationOpeningDate().isBefore(project.getApplicationClosingDate()) && p.getApplicationClosingDate().isAfter(project.getApplicationOpeningDate())) {
+                    System.out.println("You have a date conflict with another project.");
+                    throw new PageBackException();
+                }
+            }
+        }
         // Check officer is not a applicant for this project
         Request requests = RequestManager.getApplicationRequestByApplicant(officer.getID());
         Request getBookingRequests = RequestManager.getBookingRequestByApplicant(officer.getID());
@@ -186,6 +196,7 @@ public class OfficerMainPage {
             System.out.println("You have already applied for this project.");
             throw new PageBackException();
         }
+
 
     }
 

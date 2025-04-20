@@ -176,6 +176,15 @@ public class ApplicantMainPage {
             scanner.nextLine();
             throw new PageBackException();
         }
+        // Invalidate if applicant tries to apply for roomType with 0 flats available 
+        if ((roomType == RoomType.TWO_ROOM_FLAT && selectedProject.getTwoRoomFlatAvailable() <= 0) ||
+        	    (roomType == RoomType.THREE_ROOM_FLAT && selectedProject.getThreeRoomFlatAvailable() <= 0)) {
+        	    System.out.println("The selected room type is full.");
+        	    System.out.println("Press Enter to go back.");
+        	    scanner.nextLine();
+        	    throw new PageBackException();
+        	}
+        
         System.out.print("Confirm application? (Y/N): ");
         String confirm = scanner.nextLine().toUpperCase();
         if (confirm.equals("Y")) {

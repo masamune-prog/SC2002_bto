@@ -185,13 +185,27 @@ public class ProjectViewer {
             // Format all officer IDs without truncation
             String officersDisplay = formatAllOfficerIDs(project.getOfficerIDs());
 
+            int twoRoomAvailable = Math.max(project.getTwoRoomFlatAvailable(), 0);
+            int threeRoomAvailable = Math.max(project.getThreeRoomFlatAvailable(), 0);
+
+            String twoRoomDisplay = String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), twoRoomAvailable);
+            String threeRoomDisplay = String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), threeRoomAvailable);
+
+            // Check if fully booked (0 in both room types)
+            if (twoRoomAvailable == 0) {
+                twoRoomDisplay = "FULL";
+            }
+            if (threeRoomAvailable == 0) {
+                threeRoomDisplay = "FULL";
+            }
+            
             System.out.printf(columnFormat + "\n",
                     project.getID(),
                     project.getProjectTitle(),
                     project.getApplicationOpeningDate().format(DATE_FORMATTER),
                     project.getApplicationClosingDate().format(DATE_FORMATTER),
-                    String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), project.getTwoRoomFlatAvailable()),
-                    String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), project.getThreeRoomFlatAvailable()),
+                    twoRoomDisplay,
+                    threeRoomDisplay,
                     officersDisplay);
         }
 

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+
 public class ApplicantMainPage {
     private static Map<String, Integer> applicantFilterNumbers = new HashMap<>(); // Static map to store persistent numbers
     public static void applicantMainPage(User user) {
@@ -319,8 +320,14 @@ public class ApplicantMainPage {
 
     private static void deleteEnquiry(Applicant applicant) throws PageBackException, ModelNotFoundException {
         List<Enquiry> enquiries = EnquiryManager.getAllEnquiries();
+        Scanner scanner = new Scanner(System.in);
+        //get the enquiries that the user has created
+        enquiries.removeIf(enquiry -> !enquiry.getCreatorID().equals(applicant.getID()));
         if (enquiries.isEmpty()) {
             System.out.println("No enquiries found.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
         } else {
             //get list printer to work later TODO
             System.out.println("Enquiries:");
@@ -335,9 +342,16 @@ public class ApplicantMainPage {
         }
         System.out.println("Which Enquiry would you like to delete?");
         System.out.println("Enter the Enquiry ID:");
-        Scanner scanner = new Scanner(System.in);
         String enquiryID = scanner.nextLine();
         EnquiryManager.getEnquiryByID(enquiryID);
+        //check if enquiry is unanswered and if the user is the creator
+        Enquiry enquiry = EnquiryManager.getEnquiryByID(enquiryID);
+        if (enquiry.getAnswered() || !enquiry.getCreatorID().equals(applicant.getID())) {
+            System.out.println("Enquiry has already been answered. Cannot delete.");
+            System.out.println("Press Enter to go back.");
+            scanner.nextLine();
+            throw new PageBackException();
+        }
         EnquiryManager.deleteEnquiry(enquiryID);
         System.out.println("Enquiry deleted successfully.");
         System.out.println("Press Enter to go back.");

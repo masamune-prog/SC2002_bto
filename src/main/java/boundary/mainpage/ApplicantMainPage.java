@@ -107,6 +107,11 @@ public class ApplicantMainPage {
     private static void viewAvailableProjects(Applicant applicant,Integer filterNumber) throws PageBackException, ModelNotFoundException {
         if (applicant.getApplicantStatus() != ApplicantStatus.NO_REGISTRATION) {
             System.out.println("You already have an active application or registration.");
+            //get Project from the Application Request
+            ProjectApplicationRequest request = (ProjectApplicationRequest) RequestManager.getAllApplicationRequestsByUser(applicant.getID());
+            assert request != null;
+            Project project = ProjectManager.getByID(request.getProjectID());
+            ProjectViewer.displayProjects(List.of(project));
             System.out.println("Press Enter to go back.");
             throw new PageBackException();
         }

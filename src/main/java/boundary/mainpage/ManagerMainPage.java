@@ -220,9 +220,9 @@ public class ManagerMainPage {
             System.out.println("No projects available to edit.");
             return;
         }
-        displayProjects(projects);
-        int projectIndex = InputHelper.getIntInput(scanner, "Enter project number to edit: ", 1, projects.size());
-        Project project = projects.get(projectIndex - 1);
+        ProjectViewer.displayProjects(projects);
+        String projectID = InputHelper.getStringInput(scanner, "Enter project ID to edit: ");
+        Project project = ProjectManager.getByID(projectID);
         System.out.println("Editing project: " + project.getProjectTitle());
         System.out.println("Select field to edit:");
         System.out.println("1. Project Name");
@@ -368,10 +368,6 @@ public class ManagerMainPage {
                 System.out.println();
             }
         }
-        System.out.println("Press Enter to go back.");
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
-        throw new PageBackException();
     }
 
     private void showProjectApplicationRequests() throws ModelNotFoundException {
@@ -470,9 +466,9 @@ public class ManagerMainPage {
             return;
         }
 
-        displayProjects(projects);
-        int projectIndex = InputHelper.getIntInput(scanner, "Enter project number to delete: ", 1, projects.size());
-        Project project = projects.get(projectIndex - 1);
+        ProjectViewer.displayProjects(projects);
+        String projectID = InputHelper.getStringInput(scanner, "Enter project ID to delete: ");
+        Project project = ProjectManager.getByID(projectID);
 
         try {
             ProjectManager.deleteProject(project.getID());
@@ -642,10 +638,7 @@ public class ManagerMainPage {
         } catch (Exception e) {
             System.out.println("Failed to send reply: " + e.getMessage());
         }
-        System.out.println();
-        System.out.println("Press Enter to go back.");
-        scanner.nextLine();
-        throw new PageBackException();
+
     }
 
     private void displayProjects(List<Project> projects) throws ModelNotFoundException {

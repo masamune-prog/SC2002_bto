@@ -174,7 +174,8 @@ public class OfficerMainPage {
         Request requests = RequestManager.getApplicationRequestByApplicant(officer.getID());
         Request getBookingRequests = RequestManager.getBookingRequestByApplicant(officer.getID());
         if(requests == null || getBookingRequests == null) {
-            System.out.println("No application requests found.");
+            String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);
+            System.out.println("Application submitted successfully. Request ID: " + requestID);
             throw new PageBackException();
         }
         if(requests.getProjectID().equals(project.getID())) {
@@ -185,9 +186,7 @@ public class OfficerMainPage {
             System.out.println("You have already applied for this project.");
             throw new PageBackException();
         }
-        String requestID = OfficerManager.createOfficerApplicationRequest(officer.getID(), projectID);
-        System.out.println("Application submitted successfully. Request ID: " + requestID);
-        throw new PageBackException();
+
     }
 
     private static void viewOfficerApplications(Officer officer)

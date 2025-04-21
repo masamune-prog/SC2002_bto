@@ -167,24 +167,25 @@ public class ProjectViewer {
         int roomWidth = Math.max(26, projects.stream()
                 .mapToInt(p -> String.format("$%.2f, %d", p.getTwoRoomFlatPrice(), p.getTwoRoomFlatAvailable()).length())
                 .max().orElse(26));
+        int managerWidth = Math.max(10, projects.stream().mapToInt(p -> p.getManagerID().length()).max().orElse(10));
         int officerWidth = 95; // Width for officer IDs (adjust as needed)
 
         // Print table header
         String headerFormat = String.format(
-                "┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
-                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth
+                "┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
+                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, managerWidth, officerWidth
         );
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "", "").replace(' ', '─'));
 
         String columnFormat = String.format(
-                "│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
-                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth
+                "│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
+                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, managerWidth, officerWidth
         );
         System.out.printf(columnFormat + "%n",
-                "ID", "Title", "Neighbourhood", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)", "Officers"
+                "ID", "Title", "Neighbourhood", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)", "ManagerID", "Officers"
         );
 
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "", "").replace(' ', '─'));
 
         // Print each project
         for (Project project : projects) {
@@ -208,12 +209,13 @@ public class ProjectViewer {
                     project.getApplicationClosingDate().format(DATE_FORMATTER),
                     twoRoomDisplay,
                     threeRoomDisplay,
+                    project.getManagerID(),
                     officersDisplay
             );
         }
 
         // Print table footer
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "", "").replace(' ', '─'));
     }
 
     /**

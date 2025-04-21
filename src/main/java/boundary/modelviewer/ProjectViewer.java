@@ -156,61 +156,64 @@ public class ProjectViewer {
     }
     public static void displayProjects(List<Project> projects) {
         // Determine the maximum width for each column dynamically
-        if(projects.isEmpty()) {
+        if (projects.isEmpty()) {
             System.out.println("No projects to display.");
             return;
         }
         int idWidth = Math.max(8, projects.stream().mapToInt(p -> p.getID().length()).max().orElse(8));
         int titleWidth = Math.max(28, projects.stream().mapToInt(p -> p.getProjectTitle().length()).max().orElse(28));
+        int neighbourhoodWidth = Math.max(16, projects.stream().mapToInt(p -> p.getNeighbourhood().length()).max().orElse(16));
         int dateWidth = 12; // Fixed width for dates
         int roomWidth = Math.max(26, projects.stream()
                 .mapToInt(p -> String.format("$%.2f, %d", p.getTwoRoomFlatPrice(), p.getTwoRoomFlatAvailable()).length())
                 .max().orElse(26));
-        int officerWidth = 95; // Width for officer IDs (9 chars per ID + commas)
+        int officerWidth = 95; // Width for officer IDs (adjust as needed)
 
         // Print table header
-        String headerFormat = String.format("┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
-                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth);
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
+        String headerFormat = String.format(
+                "┌─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┬─%%-%ds─┐",
+                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth
+        );
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
 
-        String columnFormat = String.format("│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
-                idWidth, titleWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth);
-        System.out.printf(columnFormat + "\n",
-                "ID", "Title", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)", "Officers");
+        String columnFormat = String.format(
+                "│ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │ %%-%ds │",
+                idWidth, titleWidth, neighbourhoodWidth, dateWidth, dateWidth, roomWidth, roomWidth, officerWidth
+        );
+        System.out.printf(columnFormat + "%n",
+                "ID", "Title", "Neighbourhood", "Open Date", "Close Date", "2-Room ($, Avail)", "3-Room ($, Avail)", "Officers"
+        );
 
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
 
         // Print each project
         for (Project project : projects) {
-            // Format all officer IDs without truncation
             String officersDisplay = formatAllOfficerIDs(project.getOfficerIDs());
 
             int twoRoomAvailable = Math.max(project.getTwoRoomFlatAvailable(), 0);
             int threeRoomAvailable = Math.max(project.getThreeRoomFlatAvailable(), 0);
 
-            String twoRoomDisplay = String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), twoRoomAvailable);
-            String threeRoomDisplay = String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), threeRoomAvailable);
+            String twoRoomDisplay = twoRoomAvailable == 0
+                    ? "FULL"
+                    : String.format("$%.2f, %d", project.getTwoRoomFlatPrice(), twoRoomAvailable);
+            String threeRoomDisplay = threeRoomAvailable == 0
+                    ? "FULL"
+                    : String.format("$%.2f, %d", project.getThreeRoomFlatPrice(), threeRoomAvailable);
 
-            // Check if fully booked (0 in both room types)
-            if (twoRoomAvailable == 0) {
-                twoRoomDisplay = "FULL";
-            }
-            if (threeRoomAvailable == 0) {
-                threeRoomDisplay = "FULL";
-            }
-            
-            System.out.printf(columnFormat + "\n",
+            System.out.printf(columnFormat + "%n",
                     project.getID(),
                     project.getProjectTitle(),
+                    project.getNeighbourhood(),
                     project.getApplicationOpeningDate().format(DATE_FORMATTER),
                     project.getApplicationClosingDate().format(DATE_FORMATTER),
                     twoRoomDisplay,
                     threeRoomDisplay,
-                    officersDisplay);
+                    officersDisplay
+            );
         }
 
         // Print table footer
-        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "").replace(" ", "─"));
+        System.out.println(String.format(headerFormat, "", "", "", "", "", "", "", "").replace(' ', '─'));
     }
 
     /**

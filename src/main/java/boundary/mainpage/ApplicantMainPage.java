@@ -21,10 +21,7 @@ import utils.iocontrol.IntGetter;
 import utils.ui.BoundaryStrings;
 import utils.ui.ChangePage;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 
 public class ApplicantMainPage {
@@ -370,6 +367,7 @@ public class ApplicantMainPage {
 
     private static void editEnquiry(Applicant applicant) throws PageBackException, ModelNotFoundException {
         List<Enquiry> enquiries = EnquiryManager.getAllEnquiries();
+        enquiries.removeIf(enquiry -> !enquiry.getCreatorID().equals(applicant.getID()));
         if (enquiries.isEmpty()) {
             System.out.println("No enquiries found.");
         } else {
